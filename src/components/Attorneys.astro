@@ -10,7 +10,7 @@ import { attorneys } from '@/data/attorneys';
         <h2 id="attorneys-title" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">사건을 함께하는 변호사</h2>
         <p class="mt-2 leading-relaxed text-muted-foreground">{SITE.firm.name}의 변호사 {attorneys.length}명이 사기 피해 사건을 직접 검토하고 대응합니다.</p>
       </div>
-      <a href={SITE.phoneHref} class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg btn-gold px-5 text-sm font-bold transition-all">변호사 직접 상담 {SITE.phone}</a>
+      <a href={SITE.phoneHref} class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg btn-gold px-5 text-sm font-bold transition-all">변호사 직접 상담</a>
     </div>
     <ul class="grid grid-cols-1 gap-5 sm:grid-cols-3">
       {attorneys.map((a, i) => <li data-reveal={100 + i * 120}><AttorneyCard {...a} /></li>)}

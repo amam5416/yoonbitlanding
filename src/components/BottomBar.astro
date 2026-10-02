@@ -61,7 +61,7 @@ const LABEL = caseName ? `${caseName} 피해 접수` : '사칭 업체 피해회�
     <div class="min-w-0">
       <p class="text-base font-bold text-foreground">{LABEL}</p>
       <p class="mt-0.5 text-sm text-muted-foreground">{caseName ? '사건명은 자동으로 들어갑니다. 이름·연락처·금액만 입력하세요.' : <>필수 항목(<span class="text-destructive">*</span>)을 입력하면 바로 연락드립니다.</>}</p>
-      <a href={SITE.phoneHref} class="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-foreground hover:text-primary"><Icons name="phone" class="h-4 w-4 text-primary" />{SITE.phone}</a>
+      <a href={SITE.phoneHref} class="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-foreground hover:text-primary"><Icons name="phone" class="h-4 w-4 text-primary" />전화 상담</a>
     </div>
     <button type="button" id="sheet-close" aria-label="닫기" class="-mr-1.5 -mt-1.5 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Icons name="x" class="h-5 w-5" /></button>
   </div>

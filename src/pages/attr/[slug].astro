@@ -89,7 +89,7 @@ const schema = {
                 </div>
                 <p class="mt-1 text-sm text-muted-foreground">{SITE.firm.name}</p>
                 <dl class="mt-4 space-y-2 border-t border-border pt-4 text-sm">
-                  <div class="flex items-center gap-2"><Icons name="phone" class="h-4 w-4 shrink-0 text-primary" /><dt class="sr-only">전화</dt><dd><a href={SITE.phoneHref} class="font-semibold text-foreground hover:text-primary">{SITE.phone}</a></dd></div>
+                  <div class="flex items-center gap-2"><Icons name="phone" class="h-4 w-4 shrink-0 text-primary" /><dt class="sr-only">전화</dt><dd><a href={SITE.phoneHref} class="font-semibold text-foreground hover:text-primary">전화 상담</a></dd></div>
                   <div class="flex items-start gap-2"><Icons name="map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-primary" /><dt class="sr-only">주소</dt><dd class="text-muted-foreground">{SITE.offices[0].address.join(' ')}</dd></div>
                 </dl>
                 <a href={SITE.phoneHref} class="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg btn-gold text-sm font-bold transition-all">
@@ -177,7 +177,7 @@ const schema = {
               <h2 class="text-balance text-xl font-bold leading-snug sm:text-2xl">{a.name} 변호사와 사건을 상담하세요</h2>
               <p class="mt-3 max-w-2xl text-sm leading-relaxed text-foreground/80">사기 피해 사건은 초기 대응이 회수 가능성을 좌우합니다. 전화 한 통이면 변호사가 직접 검토해 대응 방향을 안내드립니다.</p>
               <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-                <a href={SITE.phoneHref} class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-hero-dark px-5 text-sm font-bold text-on-dark transition-colors hover:bg-hero-dark/85"><Icons name="phone" class="h-4 w-4" />{SITE.phone} 전화 상담</a>
+                <a href={SITE.phoneHref} class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-hero-dark px-5 text-sm font-bold text-on-dark transition-colors hover:bg-hero-dark/85"><Icons name="phone" class="h-4 w-4" />전화 상담</a>
                 <a href="/#cases" class="inline-flex h-11 items-center justify-center gap-1 rounded-lg border border-on-dark/30 px-5 text-sm font-semibold text-on-dark transition-colors hover:bg-on-dark/10">사칭 목록 보기<Icons name="chevron-right" class="h-4 w-4" /></a>
               </div>
             </section>

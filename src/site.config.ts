@@ -4,7 +4,7 @@ export const SITE = {
   tagline: '사기 사건 공동고소 · 형사대응 현황',
   title: '윤빛 금융사기전담본부 | 사기 피해금 추적·계좌 동결·회수 상담',
   description:
-    '법무법인 윤빛이 운영하는 사기·사칭 피해금 회수 전담본부. 피해 업체명·플랫폼명을 검색하고 자금 흐름 추적, 계좌 동결, 민사·형사 병행으로 피해금 회수 가능성을 확인하세요. 24시간 무료 상담 1551-4236.',
+    '법무법인 윤빛이 운영하는 사기·사칭 피해금 회수 전담본부. 피해 업체명·플랫폼명을 검색하고 자금 흐름 추적, 계좌 동결, 민사·형사 병행으로 피해금 회수 가능성을 확인하세요. 24시간 무료 상담.',
   url: 'https://www.yoonbitlaw-fraud.com',
   /** 콘텐츠 최종 검토일 (빌드 시 갱신) */
   updatedAt: new Date().toISOString().slice(0, 10),
@@ -16,8 +16,8 @@ export const SITE = {
     /** 브랜드 엔티티 연결 (GEO) — 실제 채널 URL로 교체. 비어 있으면 출력하지 않음 */
     sameAs: [] as string[],
   },
-  phone: '1551-4236',
-  phoneHref: 'tel:15514236',
+  phone: '010-4406-4436',
+  phoneHref: 'tel:01044064436',
   offices: [
     {
       id: 'gangnam',

@@ -11,6 +11,7 @@ import BottomBar from '@/components/BottomBar.astro';
 import Reveal from '@/components/Reveal.astro';
 import Icons from '@/components/Icons.astro';
 import CaseResults from '@/components/CaseResults.astro';
+import Location from '@/components/Location.astro';
 import { SITE } from '@/site.config';
 import type { FraudCase } from '@/data/cases';
 
@@ -234,7 +235,7 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
               <li class="flex items-center gap-2"><Icons name="lock" class="h-3.5 w-3.5 text-success-soft" />변호사 비밀유지로 가족·직장에 알리지 않음</li>
             </ul>
             <div class="mt-4 border-t border-border pt-4">
-              <a href={SITE.phoneHref} class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-input glass-input text-sm font-bold text-foreground transition-colors hover:border-primary hover:text-primary"><Icons name="phone" class="h-4 w-4" />{SITE.phone} 전화 상담</a>
+              <a href={SITE.phoneHref} class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-input glass-input text-sm font-bold text-foreground transition-colors hover:border-primary hover:text-primary"><Icons name="phone" class="h-4 w-4" />전화 상담</a>
             </div>
             <p class="mt-3 text-center text-[11px] text-muted-foreground">제출 시 <a href="/privacy" class="underline hover:text-foreground">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.</p>
           </div>
@@ -263,6 +264,8 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
         </div>
 
       </div>
+      <!-- 찾아오는 길 -->
+      <Location />
     </main>
     <Footer />
   </div>

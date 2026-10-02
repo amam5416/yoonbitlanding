@@ -23,7 +23,7 @@ const links = [
       </a>
       <div class="flex flex-col gap-1 sm:items-end">
         <a href={SITE.phoneHref} class="inline-flex h-12 items-center justify-center gap-2 rounded-lg btn-gold px-6 text-base font-bold transition-all">
-          <Icons name="phone" class="h-5 w-5" />{SITE.phone}
+          <Icons name="phone" class="h-5 w-5" />전화 상담
         </a>
         <span class="text-xs text-muted-foreground sm:text-right">24시간 접수 · 초기 상담 무료 · 비밀 보장</span>
       </div>
@@ -58,7 +58,6 @@ const links = [
         <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">법인명</dt><dd class="font-medium text-foreground">{SITE.firm.name}</dd></div>
         <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">광고책임변호사</dt><dd class="font-medium text-foreground"><a href={`/attr/${SITE.firm.lawyerSlug}`} class="hover:text-primary">{SITE.firm.lawyer}</a></dd></div>
         <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">사업자등록번호</dt><dd class="font-medium text-foreground">{SITE.firm.registration}</dd></div>
-        <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">대표전화</dt><dd class="font-medium text-foreground"><a href={SITE.phoneHref} class="hover:text-primary">{SITE.phone}</a></dd></div>
       </dl>
     </section>
 
