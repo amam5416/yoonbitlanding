@@ -5,7 +5,7 @@ export const SITE = {
   title: '윤빛 금융사기전담본부 | 사기 피해금 추적·계좌 동결·회수 상담',
   description:
     '법무법인 윤빛이 운영하는 사기·사칭 피해금 회수 전담본부. 피해 업체명·플랫폼명을 검색하고 자금 흐름 추적, 계좌 동결, 민사·형사 병행으로 피해금 회수 가능성을 확인하세요. 24시간 무료 상담.',
-  url: 'https://www.yoonbitlaw-fraud.com',
+  url: 'https://www.yoonbit.co.kr',
   /** 콘텐츠 최종 검토일 (빌드 시 갱신) */
   updatedAt: new Date().toISOString().slice(0, 10),
   firm: {

@@ -6,14 +6,14 @@ Operator: 법무법인 윤빛 (Law Firm Yoonbit), 광고책임변호사 윤수�
 Phone: 010-4406-4436 (24시간)
 Address: 서울특별시 강남구 영동대로 621, 621빌딩 11층 (강남 본사무소) / 경북 안동시 강남5길 20-26, 2층 201호 (안동 분사무소)
 Business Registration: 754-87-03255
-Sitemap: https://www.yoonbitlaw-fraud.com/sitemap-index.xml
+Sitemap: https://www.yoonbit.co.kr/sitemap-index.xml
 
 ## Key Pages
-- [홈 — 사칭 목록](https://www.yoonbitlaw-fraud.com/): 피해 업체명·플랫폼명 검색, 변호사 소개, 사무소 위치
-- [사건 상세 (예시)](https://www.yoonbitlaw-fraud.com/rcvlist/주-한미컴퍼니): 개별 사칭 사기 사건의 추적 절차, 타임라인, 접수 폼
-- [윤수빈 대표변호사](https://www.yoonbitlaw-fraud.com/attr/yoonsubin)
-- [이화영 변호사](https://www.yoonbitlaw-fraud.com/attr/leehwayoung)
-- [문지나 변호사](https://www.yoonbitlaw-fraud.com/attr/munjina)
+- [홈 — 사칭 목록](https://www.yoonbit.co.kr/): 피해 업체명·플랫폼명 검색, 변호사 소개, 사무소 위치
+- [사건 상세 (예시)](https://www.yoonbit.co.kr/rcvlist/주-한미컴퍼니): 개별 사칭 사기 사건의 추적 절차, 타임라인, 접수 폼
+- [윤수빈 대표변호사](https://www.yoonbit.co.kr/attr/yoonsubin)
+- [이화영 변호사](https://www.yoonbit.co.kr/attr/leehwayoung)
+- [문지나 변호사](https://www.yoonbit.co.kr/attr/munjina)
 
 ## Key Facts
 - 피해금 회수 절차: ① 자금 흐름 분석 → ② 계좌 동결·긴급 가압류 → ③ 민사·형사 소송 병행 → ④ 강제집행 및 환수

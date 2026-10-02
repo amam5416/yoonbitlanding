@@ -1,6 +1,6 @@
 # yoonbitlanding
 
-https://www.yoonbitlaw-fraud.com 을 Astro 7 + Tailwind 4 정적 사이트로 구현.
+윤빛 금융사기전담본부 사이트 (https://www.yoonbit.co.kr) — Astro 7 + Tailwind 4 정적 사이트.
 
 ```sh
 npm install

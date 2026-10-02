@@ -6,7 +6,7 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://www.yoonbitlaw-fraud.com',
+  site: 'https://www.yoonbit.co.kr',
   output: 'static',
   // 접수 API(/api/inquiry)만 서버에서 실행 (prerender = false). 나머지는 정적
   adapter: vercel(),
