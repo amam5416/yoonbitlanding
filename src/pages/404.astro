@@ -1,0 +1,84 @@
+---
+/** 404 — 없는 주소로 들어왔을 때. 검색창과 주요 경로를 바로 제공 */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import BottomBar from '@/components/BottomBar.astro';
+import Icons from '@/components/Icons.astro';
+import { SITE } from '@/site.config';
+import { cases, caseHref } from '@/data/cases';
+
+const recent = cases.slice(0, 5);
+const links = [
+  { href: '/#cases', icon: 'search', title: '사칭 목록', desc: '접수된 정상기업 사칭 사건 전체 보기' },
+  { href: '/#attr', icon: 'badge-check', title: '변호사 소개', desc: '사건을 맡는 변호사 프로필' },
+  { href: '/#location', icon: 'map-pin', title: '오시는 길', desc: '강남 본사무소 · 안동 분사무소' },
+] as const;
+---
+<BaseLayout title={`페이지를 찾을 수 없습니다 | ${SITE.name}`} description="요청하신 페이지가 없거나 주소가 바뀌었습니다. 사건 검색 또는 전화 상담을 이용하세요." noindex>
+  <div class="flex min-h-screen flex-col bg-background">
+    <Header />
+    <main class="flex-1">
+      <section class="relative overflow-hidden border-b border-border marble-section">
+        <div class="pointer-events-none absolute inset-0 bg-brand-glow" aria-hidden="true"></div>
+        <div class="relative mx-auto flex w-full max-w-3xl flex-col items-center px-4 py-16 text-center sm:px-6 sm:py-24">
+          <span class="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 font-mono text-xs font-semibold tracking-wider text-primary">404</span>
+          <h1 class="mt-5 text-2xl font-bold tracking-tight text-foreground sm:text-4xl">찾으시는 페이지가 없습니다</h1>
+          <p class="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">주소가 바뀌었거나 잘못 입력된 것 같습니다.<br class="sm:hidden" /> 사건 이름을 검색하거나 아래 메뉴를 이용해 주세요.</p>
+
+          <form class="mt-8 flex w-full max-w-xl flex-col gap-2 sm:flex-row" role="search" method="get" action="/">
+            <label for="nf-search" class="sr-only">사건 검색</label>
+            <div class="relative flex-1">
+              <Icons name="search" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <input id="nf-search" type="search" name="q" placeholder="리딩방 이름, 거래소명, 업체명" class="h-12 w-full rounded-md border border-input glass-input pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
+            </div>
+            <button type="submit" class="inline-flex h-12 shrink-0 items-center justify-center rounded-lg btn-gold px-7 text-sm font-semibold transition-all">검색</button>
+          </form>
+
+          <div class="mt-5 flex flex-col items-center gap-2 sm:flex-row">
+            <a href="/" class="inline-flex h-10 items-center gap-1.5 rounded-md border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"><Icons name="arrow-left" class="h-4 w-4" />홈으로</a>
+            <a href={SITE.phoneHref} class="inline-flex h-10 items-center gap-1.5 rounded-md btn-gold px-4 text-sm font-bold transition-colors"><Icons name="phone" class="h-4 w-4" />{SITE.phone} 전화 상담</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+        <div class="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+          <div>
+            <h2 class="text-base font-bold text-foreground">바로 가기</h2>
+            <ul class="mt-4 grid gap-3">
+              {links.map((l) => (
+                <li>
+                  <a href={l.href} class="group flex items-center gap-4 rounded-lg card-lux p-4 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name={l.icon} /></span>
+                    <span class="min-w-0">
+                      <span class="block text-sm font-bold text-foreground group-hover:text-primary">{l.title}</span>
+                      <span class="block text-xs text-muted-foreground">{l.desc}</span>
+                    </span>
+                    <Icons name="chevron-right" class="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-foreground">최근 접수된 사건</h2>
+            <ul class="mt-4 divide-y divide-border overflow-hidden rounded-lg card-lux">
+              {recent.map((c) => (
+                <li>
+                  <a href={caseHref(c.slug)} class="flex items-center justify-between gap-3 px-4 py-3 text-sm transition-colors hover:bg-secondary/60">
+                    <span class="min-w-0 truncate font-medium text-foreground">{c.name} <span class="font-normal text-muted-foreground">사칭 사기</span></span>
+                    <time datetime={c.date} class="shrink-0 font-mono text-xs text-muted-foreground">{c.date}</time>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a href="/#cases" class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">전체 사칭 목록 보기<Icons name="chevron-right" class="h-4 w-4" /></a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </div>
+  <BottomBar />
+</BaseLayout>

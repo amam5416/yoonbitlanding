@@ -1,0 +1,252 @@
+@import 'tailwindcss';
+
+/* =========================================================
+   디자인 토큰 — 사이트의 모든 색은 여기서만 정의한다.
+   컴포넌트는 Tailwind 토큰 클래스(bg-primary, text-success …)나
+   아래 유틸리티 클래스(bg-brand-glow, bg-photo …)만 사용한다.
+   ========================================================= */
+:root {
+  /* ─ 팔레트 출처: yoonbit-logo.jpg (검정 대리석 + 브러시드 골드) ─
+     대리석 #090806 #0e0d0c #17130f #1f1913 / 골드 #7c634a #a9825d #b2977b #e5ba86 / 빛줄기 #97744f */
+
+  /* 1) 기본 팔레트 */
+  --background: #0b0a08;        /* 페이지 바탕 (검정 대리석) */
+  --foreground: #f1e8d8;        /* 본문 글자 (따뜻한 아이보리) */
+  --card: #14110d;              /* 카드·헤더·섹션 (조금 밝은 대리석) */
+  --card-foreground: #f1e8d8;
+  --secondary: #1f1913;         /* 표 헤더, 뱃지 배경 (바닥 대리석) */
+  --secondary-foreground: #e6dcc8;
+  --muted: #1a1612;
+  --muted-foreground: #a69a84;  /* 보조 글자 (바랜 금) */
+  --accent: #3b2d21;            /* 금색 그림자 톤 */
+  --accent-foreground: #f1e8d8;
+  --border: #2c251c;            /* 테두리 */
+  --input: #2c251c;
+  --ring: #d9b983;              /* 포커스 링 (밝은 금) */
+
+  /* 2) 브랜드 (브러시드 골드) — 버튼, 강조 글자, 커서, 점 */
+  --primary: #c9a46a;
+  --primary-foreground: #14110d; /* 금 버튼 위 글자는 어둡게 */
+  --brand-hex: #c9a46a;
+
+  /* 3) 상태 색 (다크 배경용) */
+  --destructive: #e0604f;       /* 경고·실시간 접수 점 */
+  --success: #8fd4a9;           /* "진행 중" 글자 */
+  --success-soft: #3fb46a;      /* "진행 중" 점·테두리·배경 */
+
+  /* 4) 다크 히어로 (사건 상세 비디오 영역) */
+  --on-dark: #f6efe2;           /* 어두운 배경·금색 배너 위 글자/반투명 박스 */
+  --hero-dark: #0a0908;
+  --hero-dark-overlay: rgba(8, 7, 5, 0.78);
+  --hero-dark-shadow: rgba(0, 0, 0, 0.6);
+
+  /* 5) 그림자 잉크 */
+  --shadow-ink: 0 0 0;
+
+  /* 6) 장식 */
+  --canvas-point: #e5ba86;      /* 히어로 파티클 점 (밝은 금) */
+  --canvas-line: #5a4a35;       /* 히어로 파티클 선 (어두운 금) */
+  --photo-gradient: radial-gradient(115% 100% at 50% 22%, #3b2d21 0%, #1f1913 45%, #0e0d0c 100%); /* 변호사 사진 배경 */
+
+  --radius: 0.5rem;
+}
+
+/* Tailwind 클래스로 노출: bg-success, text-hero-dark, border-success-soft/20 … */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-hero-dark: var(--hero-dark);
+  --color-on-dark: var(--on-dark);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --font-sans: 'Pretendard Variable', Pretendard, ui-sans-serif, system-ui, -apple-system, 'Noto Sans KR', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --animate-hero-caret: hero-caret 1s infinite;
+}
+
+/* 금속 그라디언트 재료 (버튼·글자·라인에서 공용) */
+:root {
+  --gold-light: #efd3a3;
+  --gold-mid: #c9a46a;
+  --gold-deep: #9a7a4a;
+  --gold-gradient: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-mid) 48%, var(--gold-deep) 100%);
+  --gold-text-gradient: linear-gradient(120deg, var(--gold-deep) 0%, var(--gold-light) 40%, var(--gold-mid) 65%, var(--gold-light) 100%);
+
+  /* 글래스모피즘 재료 */
+  --glass-bg: rgba(26, 22, 17, 0.66);          /* 패널 바탕 (카드색 반투명) */
+  --glass-bg-strong: rgba(16, 13, 10, 0.82);   /* 헤더·하단 바 (더 불투명) */
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-highlight: rgba(255, 255, 255, 0.14); /* 위쪽 1px 하이라이트 */
+  --glass-blur: 14px;
+}
+
+/* 토큰 조합 유틸리티 — 그라디언트·그림자처럼 Tailwind 한 클래스로 안 되는 것 */
+@layer utilities {
+  /* ── 금속 버튼: 세로 그라디언트 + 위 하이라이트 + 아래 음영 + 호버 샤인 ── */
+  .btn-gold {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    color: var(--gold-light);
+    background-image: linear-gradient(180deg, color-mix(in oklab, var(--gold-light) 34%, transparent) 0%, color-mix(in oklab, var(--gold-mid) 16%, transparent) 100%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    border: 1px solid color-mix(in oklab, var(--gold-mid) 55%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .btn-gold::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.28) 50%, transparent 60%);
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+  }
+  .btn-gold:hover { border-color: color-mix(in oklab, var(--gold-light) 70%, transparent); background-image: linear-gradient(180deg, color-mix(in oklab, var(--gold-light) 44%, transparent) 0%, color-mix(in oklab, var(--gold-mid) 24%, transparent) 100%); }
+  .btn-gold:hover::after { transform: translateX(120%); }
+  .btn-gold:active { transform: translateY(1px); }
+
+  /* ── 금속 띠 (배너·강조 섹션 배경) ── */
+  .band-gold {
+    color: var(--foreground);
+    background-image:
+      radial-gradient(80% 120% at 10% 0%, color-mix(in oklab, var(--gold-light) 28%, transparent) 0%, transparent 55%),
+      linear-gradient(180deg, color-mix(in oklab, var(--gold-mid) 22%, transparent) 0%, color-mix(in oklab, var(--gold-deep) 14%, transparent) 100%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    border: 1px solid color-mix(in oklab, var(--gold-mid) 45%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  /* ── 금속 글자 (제목 강조) ── */
+  .text-gold {
+    background-image: var(--gold-text-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ── 고급 카드: 미묘한 세로 그라디언트 + 위쪽 하이라이트 + 깊은 그림자 ── */
+  .card-lux {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 20px 50px -30px rgba(0, 0, 0, 0.9);
+  }
+  .card-lux-gold { border-color: color-mix(in oklab, var(--gold-mid) 45%, var(--glass-border)); }
+  /* 섹션 배경: 대리석이 비치도록 카드색 반투명 베일 (section/nav/footer 용) */
+  .marble-section, .marble-section-strong {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--card) 58%, transparent), color-mix(in srgb, var(--card) 58%, transparent)),
+      url('/marble.webp');
+    background-size: auto, 1536px 1536px;
+    background-position: center top;
+    background-repeat: repeat;
+  }
+  /* 섹션마다 타일 시작점을 달리해 같은 결이 반복되지 않게 */
+  [data-marble='2'] { background-position: 0 0, 62% 560px; }
+  [data-marble='3'] { background-position: 0 0, 18% 1040px; }
+  [data-marble='4'] { background-position: 0 0, 85% 300px; }
+  .marble-section-strong {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--card) 80%, transparent), color-mix(in srgb, var(--card) 80%, transparent)),
+      url('/marble.webp');
+  }
+  /* 헤더·하단 바·시트: 더 불투명한 유리 */
+  .glass-strong {
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+    border-color: var(--glass-border);
+  }
+  /* 입력창 유리 */
+  .glass-input {
+    background: rgba(255, 255, 255, 0.045);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border-color: var(--glass-border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── 금빛 라인 (구분선·헤어라인) ── */
+  .gold-line { background-image: linear-gradient(90deg, transparent 0%, color-mix(in oklab, var(--gold-mid) 70%, transparent) 50%, transparent 100%); }
+  .hairline-gold { border-bottom: 1px solid color-mix(in oklab, var(--gold-mid) 40%, var(--border)); box-shadow: 0 1px 0 rgba(0,0,0,.6); }
+
+  /* 브랜드 색 은은한 발광 배경 (히어로, 404, 변호사 상단) */
+  .bg-brand-glow { background-image: radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--primary) 14%, transparent) 0%, transparent 70%); }
+  .bg-brand-glow-left { background-image: radial-gradient(70% 60% at 20% 0%, color-mix(in oklab, var(--primary) 14%, transparent) 0%, transparent 70%); }
+  /* 변호사 사진 뒤 배경 */
+  .bg-photo { background-image: var(--photo-gradient); }
+  /* 다크 히어로 비디오 위 어둡게 덮는 막 */
+  .overlay-hero-dark { background-image: linear-gradient(180deg, var(--hero-dark-overlay) 0%, var(--hero-dark-overlay) 100%); }
+  /* 히어로 캔버스 위아래 흰색 페이드 */
+  .overlay-hero-fade { background-image: linear-gradient(180deg, color-mix(in srgb, var(--card) 35%, transparent) 0%, transparent 30%, transparent 70%, color-mix(in srgb, var(--card) 90%, transparent) 100%); }
+  /* 그림자 */
+  .shadow-elevated-up { box-shadow: 0 -6px 20px -4px rgb(var(--shadow-ink) / 0.15); }
+  .shadow-sheet { box-shadow: 0 -12px 40px rgb(var(--shadow-ink) / 0.18); }
+  .shadow-hero-dark { box-shadow: 0 28px 80px var(--hero-dark-shadow); }
+}
+
+@keyframes hero-caret {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* 스크롤 등장: JS 가 준비된 뒤(html.reveal-ready)에만 숨김 적용 → 크롤러/no-JS 는 항상 표시 */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+@layer base {
+  * { border-color: var(--border); }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    color: var(--foreground);
+    /* 상단 금빛 비네트 + 대리석 바탕 */
+    /* 금빛 광원 → 대리석 텍스처(/marble.webp, 1536px 타일) → 바탕색 */
+    background:
+      radial-gradient(90% 45% at 50% -8%, color-mix(in oklab, var(--primary) 14%, transparent) 0%, transparent 60%),
+      radial-gradient(40% 35% at 8% 30%, color-mix(in oklab, var(--gold-mid) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(45% 40% at 92% 75%, color-mix(in oklab, var(--gold-deep) 12%, transparent) 0%, transparent 70%),
+      url('/marble.webp') center top / 1536px 1536px repeat,
+      var(--background);
+  }
+  /* 미세한 그레인 (대리석 질감) — 고정 오버레이, 입력 방해 없음 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+  body > * { position: relative; z-index: 1; }
+  /* 입력창: 안쪽으로 파인 느낌 */
+}

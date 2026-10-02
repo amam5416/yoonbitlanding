@@ -1,0 +1,106 @@
+---
+/**
+ * 법무법인 위치 — 왼쪽 사무소 선택 / 오른쪽 큰 지도.
+ * 기본 선택은 첫 번째(본사무소). 지도 iframe 은 둘 다 렌더해 전환 시 다시 로드하지 않음.
+ */
+import Icons from './Icons.astro';
+import { SITE } from '@/site.config';
+const offices = SITE.offices;
+const mapSrc = (q: string) => `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=16&hl=ko&output=embed`;
+---
+<section id="location" class="marble-section-strong" data-marble="4" aria-labelledby="location-title">
+  <div class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+  <div data-reveal="0" class="mb-8 max-w-2xl">
+    <h2 id="location-title" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">법무법인 윤빛 오시는 길</h2>
+    <p class="mt-2 leading-relaxed text-muted-foreground">강남 본사무소와 안동 분사무소에서 상담을 진행합니다.<br class="sm:hidden" /> 방문 전 전화로 상담 시간을 예약해 주세요.</p>
+  </div>
+
+  <div data-reveal="100" class="overflow-hidden rounded-xl card-lux md:grid md:grid-cols-[300px_1fr] lg:grid-cols-[340px_1fr]">
+    <!-- 사무소 선택 -->
+    <div class="flex flex-col border-b border-border md:border-b-0 md:border-r">
+      <div role="tablist" aria-label="사무소 선택" class="flex gap-2 p-3 md:flex-col md:gap-0 md:p-0">
+        {offices.map((o, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`office-tab-${o.id}`}
+            aria-controls={`office-panel-${o.id}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            data-office={o.id}
+            class="office-tab group flex flex-1 flex-col gap-1 rounded-lg border border-border p-3 text-left transition-colors aria-selected:border-primary aria-selected:bg-primary/5 md:flex-none md:rounded-none md:border-0 md:border-b md:border-border md:p-5 md:aria-selected:border-l-4 md:aria-selected:border-l-primary md:aria-selected:bg-primary/5"
+          >
+            <span class="flex items-center gap-2">
+              <span class="text-sm font-bold text-foreground group-aria-selected:text-primary sm:text-base">{o.label}</span>
+              {i === 0 && <span class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">본점</span>}
+            </span>
+            <span class="hidden text-xs leading-relaxed text-muted-foreground md:block">{o.address.filter(Boolean).join(' ')}</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- 선택된 사무소 상세 -->
+      <div class="p-5 md:mt-auto md:p-6">
+        {offices.map((o, i) => (
+          <div id={`office-panel-${o.id}`} role="tabpanel" aria-labelledby={`office-tab-${o.id}`} data-office-panel={o.id} class:list={['space-y-4', i !== 0 && 'hidden']}>
+            <div class="flex items-start gap-3">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name="map-pin" class="h-4 w-4" /></div>
+              <div>
+                <p class="text-xs font-medium text-muted-foreground">주소</p>
+                <p class="mt-0.5 text-sm font-semibold leading-relaxed text-foreground">
+                  {o.address.filter(Boolean).map((line) => <span class="block">{line}</span>)}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name="phone" class="h-4 w-4" /></div>
+              <div>
+                <p class="text-xs font-medium text-muted-foreground">전화번호</p>
+                <a href={SITE.phoneHref} class="mt-0.5 block text-sm font-semibold text-foreground hover:text-primary">{SITE.phone}</a>
+              </div>
+            </div>
+          </div>
+        ))}
+        <a href={SITE.phoneHref} class="mt-5 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg btn-gold text-sm font-bold transition-all">
+          <Icons name="phone" class="h-4 w-4" />상담 신청하기
+        </a>
+      </div>
+    </div>
+
+    <!-- 지도 -->
+    <div class="relative min-h-[320px] bg-secondary md:min-h-[460px]">
+      {offices.map((o, i) => (
+        <iframe
+          title={o.mapTitle}
+          src={mapSrc(o.mapQuery)}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          data-office-map={o.id}
+          class:list={['absolute inset-0 h-full w-full', i !== 0 && 'hidden']}
+        ></iframe>
+      ))}
+      <div class="pointer-events-none absolute bottom-3 left-3 right-3 flex items-center gap-2 rounded-lg card-lux/95 px-3 py-2 text-xs shadow backdrop-blur sm:left-4 sm:right-auto sm:bottom-4">
+        <Icons name="map-pin" class="h-3.5 w-3.5 shrink-0 text-primary" />
+        <span id="office-caption" class="truncate font-medium text-foreground">{offices[0].label} · {offices[0].address.filter(Boolean).join(' ')}</span>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<script>
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('.office-tab'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-office-panel]'));
+  const maps = Array.from(document.querySelectorAll<HTMLElement>('[data-office-map]'));
+  const caption = document.getElementById('office-caption')!;
+  tabs.forEach((t) =>
+    t.addEventListener('click', () => {
+      const id = t.dataset.office;
+      tabs.forEach((b) => b.setAttribute('aria-selected', String(b === t)));
+      panels.forEach((p) => p.classList.toggle('hidden', p.dataset.officePanel !== id));
+      maps.forEach((m) => m.classList.toggle('hidden', m.dataset.officeMap !== id));
+      const label = t.querySelector('span span')?.textContent || '';
+      const addr = t.querySelector('span.hidden')?.textContent || '';
+      caption.textContent = addr ? `${label} · ${addr}` : label;
+    }),
+  );
+</script>

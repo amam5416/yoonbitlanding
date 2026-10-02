@@ -1,0 +1,100 @@
+---
+/** 컴팩트 히어로: 제목 + 검색 + three.js 배경. 바로 아래 사건 목록이 이어짐 */
+import Icons from './Icons.astro';
+import HeroCanvas from './HeroCanvas.astro';
+import { TOTAL_CASES, cases, caseHref } from '@/data/cases';
+
+/** 클라이언트 검색용 인덱스 (제목 + 링크) */
+const searchIndex = cases.map((c) => ({ t: c.title, h: caseHref(c.slug), d: c.date }));
+---
+<section class="relative overflow-hidden border-b border-border marble-section" aria-labelledby="hero-title">
+  <HeroCanvas />
+  <div class="relative z-10 mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+    <div class="mx-auto flex max-w-3xl flex-col items-center text-center">
+      <span data-reveal="0" class="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+        <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" aria-hidden="true"></span>Recovery Division
+      </span>
+      <!-- 전체 문장이 HTML 에 있고(aria-label 포함), JS 가 켜지면 글자를 하나씩 되살림. min-h 로 줄 높이를 미리 확보해 CLS 방지 -->
+      <h1 id="hero-title" aria-label="리딩방에 날린 돈, 아직 찾을 수 있습니다" class="mt-4 min-h-[2.6em] text-pretty text-2xl font-bold leading-tight tracking-tight text-foreground sm:min-h-[1.3em] sm:text-4xl">
+        <span data-type>리딩방에 날린 돈,</span><br class="sm:hidden" /> <span data-type class="text-gold">아직 찾을 수 있습니다</span><span aria-hidden="true" class="ml-0.5 inline-block h-[0.85em] w-[0.09em] translate-y-[0.08em] rounded-[1px] bg-primary align-baseline animate-hero-caret"></span>
+      </h1>
+      <!-- 첫 페인트 전에 글자를 비워 "전체 문장 → 지움 → 타이핑" 깜빡임 방지. 원문은 data-text 에 보존 -->
+      <script is:inline>
+        document.querySelectorAll('#hero-title [data-type]').forEach((s) => { s.dataset.text = s.textContent; s.textContent = ''; });
+      </script>
+      <p data-reveal="160" class="mt-3 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
+        리딩방, 코인 거래소 사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br class="sm:hidden" /> 돈을 보낸 곳 이름을 검색해 보세요.
+      </p>
+
+      <form id="recovery-search-form" data-reveal="240" class="mt-6 flex w-full max-w-2xl flex-col gap-2 sm:flex-row" role="search" method="get" action="/">
+        <label for="recovery-search" class="sr-only">리딩방, 거래소, 업체명 검색</label>
+        <div class="relative flex-1">
+          <Icons name="search" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <input id="recovery-search" type="search" name="q" autocomplete="off" placeholder="리딩방 이름, 거래소명, 업체명을 입력하세요 (예: OURBIT, 코인플레이스)" class="h-12 w-full rounded-md border border-input glass-input pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
+        </div>
+        <button type="submit" class="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-lg btn-gold px-7 text-sm font-semibold whitespace-nowrap transition-all active:translate-y-px">검색</button>
+      </form>
+      <div id="search-results" class="mt-3 hidden w-full max-w-2xl text-left" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // 제목 타이핑: 원문은 HTML 에 그대로 있고, 애니메이션은 텍스트 노드만 교체 (레이아웃 재계산 최소화)
+  // 짧은 1회성 효과라 prefers-reduced-motion 과 무관하게 재생 (무거운 three.js 배경만 설정을 따름)
+  (() => {
+    const parts = Array.from(document.querySelectorAll<HTMLElement>('#hero-title [data-type]'));
+    if (!parts.length) return;
+    const texts = parts.map((p) => p.dataset.text ?? p.textContent ?? '');
+    const nodes = parts.map((p) => { const n = document.createTextNode(''); p.replaceChildren(n); return n; });
+    const SPEED = 55; // ms/글자
+    let i = 0, j = 0, last = 0;
+    const tick = (t: number) => {
+      if (t - last >= SPEED) {
+        last = t;
+        if (i < texts.length) {
+          j++;
+          nodes[i].data = texts[i].slice(0, j);
+          if (j >= texts[i].length) { i++; j = 0; last = t + 220; } // 구절 사이 짧은 멈춤
+        }
+      }
+      if (i < texts.length) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  })();
+</script>
+
+<script type="application/json" id="search-index" set:html={JSON.stringify(searchIndex)} />
+<script>
+  const index: { t: string; h: string; d: string }[] = JSON.parse(document.getElementById('search-index')!.textContent || '[]');
+  const input = document.getElementById('recovery-search') as HTMLInputElement;
+  const form = document.getElementById('recovery-search-form') as HTMLFormElement;
+  const box = document.getElementById('search-results')!;
+  const phone = (document.querySelector('a[href^="tel:"]') as HTMLAnchorElement | null)?.getAttribute('href') || '#';
+  const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '');
+
+  function render(q: string) {
+    const nq = norm(q);
+    if (!nq) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    const hits = index.filter((i) => norm(i.t).includes(nq)).slice(0, 10);
+    box.classList.remove('hidden');
+    box.innerHTML = hits.length
+      ? `<ul class="divide-y divide-border overflow-hidden rounded-lg border border-border bg-background shadow-lg">${hits
+          .map((i, k) => `<li style="animation:reveal-in .35s ${k * 40}ms both"><a href="${i.h}" class="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-secondary/60"><span class="font-medium text-foreground">${i.t}</span><span class="font-mono text-xs text-muted-foreground">${i.d}</span></a></li>`)
+          .join('')}</ul>`
+      : `<div class="rounded-lg border border-border bg-background px-4 py-4 text-sm text-muted-foreground shadow-lg">'<strong class="text-foreground">${q}</strong>' 이름으로 접수된 사건은 아직 없습니다. 리딩방은 이름을 자주 바꾸니 <a href="${phone}" class="font-semibold text-primary">전화로 물어보시면</a> 같은 조직인지 확인해 드립니다.</div>`;
+  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = input.value.trim();
+    history.replaceState(null, '', q ? `?q=${encodeURIComponent(q)}` : location.pathname);
+    render(q);
+  });
+  input.addEventListener('input', () => render(input.value.trim()));
+  const q0 = new URLSearchParams(location.search).get('q');
+  if (q0) { input.value = q0; render(q0); }
+</script>
+
+<style is:global>
+  @keyframes reveal-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+</style>

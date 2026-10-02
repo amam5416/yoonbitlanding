@@ -1,0 +1,116 @@
+---
+/**
+ * 피해금 회복 사례 — 가로 자동 슬라이드 (무한 루프 + 원통형 회전감).
+ * 10장을 두 번 이어 붙이고 트랙이 절반만큼 이동하면 0 으로 되감아 10 → 1 이 끊김 없이 이어짐.
+ * 각 카드는 화면 중앙과의 거리에 따라 rotateY/scale 을 받아 원형으로 돌아가는 느낌.
+ * 이미지: public/cases/w/N.webp (목록) / public/cases/N.jpg (확대)
+ */
+import Icons from './Icons.astro';
+/** embedded: 페이지 본문(좁은 컬럼) 안에 삽입 — 섹션 배경·여백 없이 */
+interface Props { embedded?: boolean }
+const { embedded = false } = Astro.props;
+const COUNT = 10;
+const items = Array.from({ length: COUNT }, (_, i) => ({ n: i + 1, thumb: `/cases/w/${i + 1}.webp`, full: `/cases/${i + 1}.jpg` }));
+const loop = [...items, ...items];
+---
+<section id="results" class:list={[embedded ? 'scroll-mt-24' : 'marble-section-strong']} data-marble={embedded ? undefined : '3'} aria-labelledby="results-title">
+  <div class:list={[embedded ? '' : 'mx-auto w-full max-w-6xl px-4 pt-14 sm:px-6']}>
+    <div data-reveal="0" class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div class="max-w-2xl">
+        <div class="flex items-center gap-2">
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-success-soft/15 text-success"><Icons name="badge-check" class="h-4 w-4" /></span>
+          <h2 id="results-title" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">실제로 돌려받은 증빙 자료</h2>
+        </div>
+        <p class="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">법무법인 윤빛이 실제 회수한 사건의 결과 안내서입니다. 개인정보 보호를 위해 일부를 가렸습니다. 카드를 누르면 크게 볼 수 있습니다.</p>
+      </div>
+      <p class="text-xs text-muted-foreground">※ 사건별 사실관계와 진행 결과는 달라질 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- 슬라이더 (풀폭) -->
+  <div id="results-slider" class:list={['relative overflow-hidden [perspective:1400px]', embedded ? 'mt-6 -mx-4 pb-6 sm:-mx-6' : 'mt-8 pb-14']} aria-roledescription="carousel" aria-label="피해금 회복 사례 슬라이드">
+    <!-- 양끝 페이드 -->
+    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-background to-transparent sm:w-32" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-background to-transparent sm:w-32" aria-hidden="true"></div>
+    <ul id="results-track" class="flex w-max gap-4 px-4 will-change-transform [transform-style:preserve-3d] sm:gap-6">
+      {loop.map((it, i) => (
+        <li class:list={['results-card shrink-0 [transform-style:preserve-3d]', embedded ? 'w-[180px] sm:w-[200px]' : 'w-[200px] sm:w-[240px] md:w-[270px]']} aria-hidden={i >= COUNT ? 'true' : undefined}>
+          <button type="button" class="group block w-full overflow-hidden rounded-xl border border-border bg-card shadow-[0_18px_40px_-20px_rgba(0,0,0,0.9)] outline-none transition-[border-color] hover:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring" data-full={it.full} aria-label={`회복 사례 ${it.n} 크게 보기`} tabindex={i >= COUNT ? -1 : 0}>
+            <img src={it.thumb} alt={`피해금 회수 결과 안내서 ${it.n}`} width="640" height="760" loading="lazy" decoding="async" class="block aspect-[1078/1280] w-full object-cover" />
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- 확대 보기 -->
+  <dialog id="results-dialog" class="m-auto max-h-[92vh] w-[min(92vw,640px)] rounded-2xl border-0 bg-transparent p-0 backdrop:bg-black/75 backdrop:backdrop-blur-sm">
+    <div class="relative">
+      <img id="results-dialog-img" src="" alt="피해금 회수 결과 안내서" class="block max-h-[88vh] w-full rounded-2xl border border-border object-contain" />
+      <button type="button" id="results-dialog-close" aria-label="닫기" class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-on-dark backdrop-blur hover:bg-black/80"><Icons name="x" class="h-5 w-5" /></button>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  const slider = document.getElementById('results-slider')!;
+  const track = document.getElementById('results-track') as HTMLUListElement;
+  const cards = Array.from(track.children) as HTMLElement[];
+  const SPEED = 0.6;          // px / frame (약 36px/s)
+  const MAX_ROT = 22;         // 가장자리 카드의 최대 회전각
+  let x = 0, half = 0, paused = false, visible = true, last = 0;
+
+  const measure = () => { half = track.scrollWidth / 2; };
+  measure(); window.addEventListener('resize', measure, { passive: true });
+
+  // 모바일(<768px)만 원통형 회전감, 데스크톱은 평면 마퀴 + 가장자리 살짝 어둡게
+  const mq = window.matchMedia('(max-width: 767px)');
+  let is3D = mq.matches;
+  mq.addEventListener('change', (e) => { is3D = e.matches; if (!is3D) cards.forEach((c) => { c.style.transform = ''; c.style.opacity = ''; }); });
+  function shape() {
+    const vw = slider.clientWidth, cx = vw / 2;
+    for (const card of cards) {
+      const r = card.getBoundingClientRect();
+      if (r.right < -100 || r.left > vw + 100) continue;
+      const d = (r.left + r.width / 2 - cx) / cx;           // -1 ~ 1
+      if (is3D) {
+        const rot = -d * MAX_ROT, scale = 1 - Math.min(1, Math.abs(d)) * 0.12, z = -Math.abs(d) * 90;
+        card.style.transform = `translateZ(${z}px) rotateY(${rot}deg) scale(${scale})`;
+        card.style.opacity = String(1 - Math.min(1, Math.abs(d)) * 0.35);
+      } else {
+        card.style.transform = '';
+        card.style.opacity = String(1 - Math.min(1, Math.abs(d)) * 0.25);
+      }
+    }
+  }
+
+  function tick(t: number) {
+    requestAnimationFrame(tick);
+    if (paused || !visible || document.hidden) { last = t; return; }
+    const dt = Math.min(48, t - last || 16); last = t;
+    x += SPEED * (dt / 16.7);
+    if (x >= half) x -= half;                               // 10번 뒤에 바로 1번
+    track.style.transform = `translate3d(${-x}px,0,0)`;
+    shape();
+  }
+  const io = new IntersectionObserver(([en]) => { visible = en.isIntersecting; }, { threshold: 0.05 });
+  io.observe(slider);
+  slider.addEventListener('pointerenter', () => (paused = true));
+  slider.addEventListener('pointerleave', () => (paused = false));
+  slider.addEventListener('touchstart', () => (paused = true), { passive: true });
+  slider.addEventListener('touchend', () => setTimeout(() => (paused = false), 1200), { passive: true });
+  requestAnimationFrame(tick);
+
+  // 확대 보기
+  const dlg = document.getElementById('results-dialog') as HTMLDialogElement;
+  const img = document.getElementById('results-dialog-img') as HTMLImageElement;
+  track.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-full]');
+    if (!btn) return;
+    img.src = btn.dataset.full!; dlg.showModal(); paused = true;
+  });
+  const close = () => { dlg.close(); paused = false; };
+  document.getElementById('results-dialog-close')?.addEventListener('click', close);
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
+  dlg.addEventListener('close', () => (paused = false));
+</script>

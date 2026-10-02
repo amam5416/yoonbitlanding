@@ -1,0 +1,138 @@
+---
+import '@/styles/global.css';
+import { SITE } from '@/site.config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  type?: 'website' | 'article' | 'profile';
+  /** og:image 경로 (기본 /og.jpg) */
+  ogImage?: string;
+  ogImageAlt?: string;
+  /** 페이지별 추가 JSON-LD */
+  schema?: object | object[];
+  /** canonical 재정의 (기본: 현재 경로) */
+  canonical?: string;
+  /** 검색 노출 제외 */
+  noindex?: boolean;
+  /** 페이지네이션 */
+  prev?: string;
+  next?: string;
+}
+const {
+  title = SITE.title,
+  description = SITE.description,
+  type = 'website',
+  ogImage: ogPath = '/og.jpg',
+  ogImageAlt = SITE.name,
+  schema,
+  canonical: canonicalProp,
+  noindex = false,
+  prev,
+  next,
+} = Astro.props;
+const siteUrl = SITE.url;
+const canonicalUrl =
+  canonicalProp ?? (Astro.url.pathname === '/' ? `${siteUrl}/` : new URL(Astro.url.pathname, siteUrl).toString().replace(/\/$/, ''));
+const ogImage = `${siteUrl}${ogPath}`;
+
+const siteSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': ['LegalService', 'LocalBusiness'],
+      '@id': `${siteUrl}/#legalservice`,
+      name: SITE.name,
+      alternateName: 'Yoonbit Financial Fraud Task Force',
+      description: SITE.description,
+      url: `${siteUrl}/`,
+      image: ogImage,
+      logo: `${siteUrl}/logo.png`,
+      telephone: SITE.phone,
+      priceRange: '초기 상담 무료',
+      areaServed: { '@type': 'Country', name: 'KR' },
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '영동대로 621, 621빌딩 11층',
+        addressLocality: '강남구',
+        addressRegion: '서울특별시',
+        addressCountry: 'KR',
+      },
+      geo: { '@type': 'GeoCoordinates', latitude: SITE.offices[0].geo.lat, longitude: SITE.offices[0].geo.lng },
+      openingHoursSpecification: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: '00:00',
+        closes: '23:59',
+      },
+      knowsAbout: ['투자사기', '사칭사기', '리딩방 사기', '피해금 회수', '계좌 동결', '가압류', '집단소송', '보이스피싱'],
+      serviceType: ['사기 피해금 추적', '계좌 동결·긴급 가압류', '형사고소 대리', '민사소송', '집단 공동고소'],
+      ...(SITE.firm.sameAs.length ? { sameAs: SITE.firm.sameAs } : {}),
+      parentOrganization: {
+        '@type': 'Organization',
+        '@id': `${siteUrl}/#lawfirm`,
+        name: SITE.firm.name,
+        legalName: SITE.firm.name,
+        taxID: SITE.firm.registration,
+        employee: { '@id': `${siteUrl}/attr/${SITE.firm.lawyerSlug}#person` },
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      name: SITE.name,
+      url: `${siteUrl}/`,
+      inLanguage: 'ko-KR',
+      publisher: { '@id': `${siteUrl}/#legalservice` },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: `${siteUrl}/?q={search_term_string}` },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
+};
+const schemas = [siteSchema, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+---
+<!doctype html>
+<html lang="ko" class="bg-background">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preload" as="image" href="/logo.png" />
+  <link rel="icon" href="/favicon.ico" sizes="256x256" type="image/x-icon" />
+  <meta name="generator" content={Astro.generator} />
+  <!-- 스크롤 등장 애니메이션용: JS 가 켜진 환경에서만 숨김 스타일 활성화 (첫 페인트 전에 실행) -->
+  <script is:inline>document.documentElement.classList.add('reveal-ready')</script>
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
+  <link rel="canonical" href={canonicalUrl} />
+  <link rel="alternate" hreflang="ko" href={canonicalUrl} />
+  <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+  {prev && <link rel="prev" href={prev} />}
+  {next && <link rel="next" href={next} />}
+  <meta name="author" content={SITE.firm.name} />
+  <meta property="og:type" content={type} />
+  <meta property="og:site_name" content={SITE.name} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={ogImage} />
+  {ogPath === '/og.jpg' && <meta property="og:image:width" content="1254" />}
+  {ogPath === '/og.jpg' && <meta property="og:image:height" content="1254" />}
+  <meta property="og:image:alt" content={ogImageAlt} />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImage} />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  <slot name="head" />
+</head>
+<body class="font-sans antialiased pb-[68px] md:pb-[56px]">
+  <slot />
+</body>
+</html>

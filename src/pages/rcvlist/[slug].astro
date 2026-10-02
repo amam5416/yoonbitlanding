@@ -1,0 +1,16 @@
+---
+/**
+ * 사건 상세 라우트 — DB(또는 샘플)에서 로드한 사건마다 정적 페이지 생성.
+ * 실제 화면은 공용 템플릿 src/components/CaseDetail.astro 가 담당.
+ */
+import CaseDetail from '@/components/CaseDetail.astro';
+import { cases, type FraudCase } from '@/data/cases';
+
+export function getStaticPaths() {
+  return cases.map((c) => ({ params: { slug: c.slug }, props: { c } }));
+}
+
+interface Props { c: FraudCase }
+const { c } = Astro.props;
+---
+<CaseDetail c={c} />

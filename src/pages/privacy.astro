@@ -1,0 +1,298 @@
+---
+/** 개인정보처리방침 — 개인정보 보호법 제30조 필수 기재사항 + 법률사무 특성 반영 */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import BottomBar from '@/components/BottomBar.astro';
+import Icons from '@/components/Icons.astro';
+import { SITE } from '@/site.config';
+
+const EFFECTIVE = '2026. 1. 10.';
+const firm = SITE.firm.name;
+const site = 'www.yoonbitlaw-fraud.com';
+
+const toc = [
+  ['purpose', '제1조 개인정보의 처리 목적'],
+  ['items', '제2조 처리하는 개인정보의 항목 및 수집 방법'],
+  ['retention', '제3조 개인정보의 처리 및 보유 기간'],
+  ['third-party', '제4조 개인정보의 제3자 제공'],
+  ['outsourcing', '제5조 개인정보 처리의 위탁'],
+  ['rights', '제6조 정보주체와 법정대리인의 권리·의무 및 행사 방법'],
+  ['destroy', '제7조 개인정보의 파기 절차 및 방법'],
+  ['security', '제8조 개인정보의 안전성 확보 조치'],
+  ['cookies', '제9조 자동 수집 장치의 설치·운영 및 거부'],
+  ['officer', '제10조 개인정보 보호책임자'],
+  ['remedy', '제11조 권익침해 구제 방법'],
+  ['changes', '제12조 처리방침의 변경'],
+];
+
+const purposes = [
+  ['법률상담 접수 및 응대', '상담 신청 확인, 사건 경위 파악, 상담 일정 안내, 변호사 배정'],
+  ['사건 수임 검토 및 수행', '수임 가능성 검토, 위임계약 체결, 소송·고소 등 법률사무 수행, 진행 상황 통지'],
+  ['피해 사실 확인 및 공동대응', '동일·유사 사건 피해자 간 공동고소·집단소송 참여 안내(별도 동의 시)'],
+  ['고충 처리', '문의·불만 접수 및 처리 결과 통지'],
+  ['서비스 개선 및 광고 성과 분석', '웹사이트 이용 통계, 광고 캠페인 효과 측정(식별 불가능한 형태로 처리)'],
+];
+
+const items = [
+  { how: '상담 접수 폼(웹)', required: '이름, 연락처(휴대전화), 피해금액', optional: '사칭 업체 이름(상세 페이지에서는 자동 입력)' },
+  { how: '전화·메신저 상담', required: '이름, 연락처, 상담 내용(통화 메모)', optional: '송금 내역, 상대방 계좌·연락처, 대화 기록 등 제출 자료' },
+  { how: '사건 수임 시', required: '성명, 생년월일, 주소, 신분증 사본, 위임계약 정보', optional: '계좌 정보(비용 정산용), 사건 관련 증거 자료' },
+  { how: '자동 수집', required: 'IP 주소, 접속 일시, 브라우저·기기 정보, 유입 경로(광고 식별자)', optional: '쿠키' },
+];
+
+const retention = [
+  ['상담 접수 정보(미수임)', '상담 종료 후 1년', '정보주체 동의 / 분쟁 대응'],
+  ['사건 수임 정보 및 사건 기록', '사건 종결 후 5년', '변호사법 및 세법상 장부·기록 보존 의무'],
+  ['위임계약·비용 정산 기록', '5년', '전자상거래법·국세기본법'],
+  ['고충 처리 기록', '3년', '전자상거래법'],
+  ['웹사이트 접속 기록(IP 등)', '3개월', '통신비밀보호법'],
+];
+
+const processors = [
+  ['웹사이트 호스팅 및 접수 데이터 전송', '클라우드 호스팅 사업자(해외 소재 가능)', '접수 폼 데이터, 접속 로그'],
+  ['상담 접수 알림 및 고객 관리', '상담 관리 시스템(CRM) 운영사', '이름, 연락처, 사건명, 상담 내용'],
+  ['광고 성과 측정', '광고 플랫폼(네이버·구글 등)', '쿠키, 광고 식별자, 전환 여부(비식별)'],
+];
+
+const rights = [
+  '개인정보 열람 요구',
+  '오류 등이 있을 경우 정정·삭제 요구',
+  '처리정지 요구',
+  '동의 철회 요구',
+];
+
+const security = [
+  ['관리적 조치', '개인정보 취급 직원 최소화 및 정기 교육, 내부관리계획 수립·시행, 변호사·직원의 비밀유지 서약'],
+  ['기술적 조치', '접수 데이터 전송 구간 암호화(HTTPS), 접근 권한 관리 및 접근 기록 보관, 보안 프로그램 설치·갱신'],
+  ['물리적 조치', '사건 기록 보관 장소 잠금 및 출입 통제, 종이 문서 분리 보관'],
+];
+
+const remedies = [
+  { name: '개인정보침해신고센터', org: '한국인터넷진흥원', tel: '(국번 없이) 118', url: 'https://privacy.kisa.or.kr' },
+  { name: '개인정보분쟁조정위원회', org: '', tel: '(국번 없이) 1833-6972', url: 'https://www.kopico.go.kr' },
+  { name: '대검찰청 사이버수사과', org: '', tel: '(국번 없이) 1301', url: 'https://www.spo.go.kr' },
+  { name: '경찰청 사이버수사국', org: '', tel: '(국번 없이) 182', url: 'https://ecrm.police.go.kr' },
+];
+
+const h2 = 'scroll-mt-24 text-lg font-bold tracking-tight text-foreground sm:text-xl';
+const p = 'mt-3 text-sm leading-relaxed text-muted-foreground';
+const th = 'border-b border-border bg-secondary/60 px-3 py-2.5 text-left text-xs font-semibold text-foreground sm:px-4';
+const td = 'border-b border-border px-3 py-2.5 align-top text-sm text-muted-foreground last:border-b-0 sm:px-4';
+---
+<BaseLayout title={`개인정보처리방침 | ${SITE.name}`} description={`${firm} 개인정보처리방침. 법률상담 접수 과정에서 처리하는 개인정보의 항목, 목적, 보유 기간, 위탁, 정보주체 권리, 보호책임자를 안내합니다.`} noindex>
+  <div class="flex min-h-screen flex-col bg-background">
+    <Header />
+    <main class="flex-1">
+      <nav aria-label="브레드크럼" class="border-b border-border marble-section">
+        <div class="mx-auto flex w-full max-w-5xl items-center gap-1.5 px-4 py-3 text-xs text-muted-foreground sm:px-6">
+          <a class="hover:text-foreground" href="/">홈</a>
+          <Icons name="chevron-right" class="h-3.5 w-3.5" />
+          <span class="font-medium text-foreground">개인정보처리방침</span>
+        </div>
+      </nav>
+
+      <div class="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14 lg:grid lg:grid-cols-[220px_1fr] lg:gap-12">
+        <!-- 목차 -->
+        <aside class="mb-8 lg:mb-0">
+          <div class="rounded-lg card-lux p-4 lg:sticky lg:top-24">
+            <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">목차</p>
+            <ol class="mt-3 space-y-1.5 text-sm">
+              {toc.map(([id, label]) => (
+                <li><a href={`#${id}`} class="block text-muted-foreground hover:text-primary">{label.replace(/^제\d+조 /, '')}</a></li>
+              ))}
+            </ol>
+          </div>
+        </aside>
+
+        <article class="min-w-0">
+          <header class="border-b border-border pb-6">
+            <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{firm} 개인정보처리방침</h1>
+            <p class="mt-2 text-sm text-muted-foreground">시행일 {EFFECTIVE} · 최종 개정 <time datetime={SITE.updatedAt}>{SITE.updatedAt}</time></p>
+          </header>
+
+          <p class={p}>
+            {firm}(광고책임변호사 {SITE.firm.lawyer.replace(' 변호사', '')}, 주소 서울특별시 강남구 영동대로 621, 621빌딩 11층, 사업자등록번호 {SITE.firm.registration}, 이하 "로펌")은 「개인정보 보호법」 제30조 및 「변호사법」 제26조(비밀유지의무) 등 관계 법령을 준수하며, 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리하기 위하여 다음과 같이 개인정보처리방침을 수립·공개합니다.
+          </p>
+          <p class={p}>
+            본 방침은 로펌이 운영하는 사기·사칭 피해금 추적·회복 법률상담 웹사이트({site}, 이하 "서비스")와 전화·메신저를 통한 상담 신청, 그리고 이후 사건 수임 과정에서 처리되는 개인정보에 적용됩니다. 서비스는 회원가입·로그인·결제 절차가 없으며, 이용자가 자발적으로 제출하는 상담 신청 정보만을 필요한 최소한으로 처리합니다.
+          </p>
+          <div class="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm leading-relaxed text-foreground/90">
+            <strong class="font-semibold">변호사 비밀유지 안내.</strong> 상담 과정에서 알게 된 사건 내용과 개인정보는 「변호사법」 제26조에 따른 비밀유지의무의 보호를 받습니다. 정보주체의 명시적 동의나 법령상 의무가 없는 한 가족·직장 등 제3자에게 공개하지 않습니다.
+          </div>
+
+          <div class="mt-10 space-y-12">
+            <!-- 1 -->
+            <section id="purpose">
+              <h2 class={h2}>제1조 (개인정보의 처리 목적)</h2>
+              <p class={p}>로펌은 다음의 목적을 위하여 개인정보를 처리합니다. 처리하는 개인정보는 다음 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행합니다.</p>
+              <div class="mt-4 overflow-x-auto rounded-lg border border-border">
+                <table class="w-full border-collapse">
+                  <thead><tr><th class={th}>목적</th><th class={th}>세부 내용</th></tr></thead>
+                  <tbody>{purposes.map(([a, b]) => <tr><td class={`${td} font-medium text-foreground`}>{a}</td><td class={td}>{b}</td></tr>)}</tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- 2 -->
+            <section id="items">
+              <h2 class={h2}>제2조 (처리하는 개인정보의 항목 및 수집 방법)</h2>
+              <p class={p}>로펌은 상담·수임 단계에 따라 아래 항목을 수집합니다. 선택 항목을 제공하지 않아도 상담 신청은 가능하나, 사건 검토에 필요한 정보가 부족하면 안내 범위가 제한될 수 있습니다.</p>
+              <div class="mt-4 overflow-x-auto rounded-lg border border-border">
+                <table class="w-full border-collapse">
+                  <thead><tr><th class={th}>수집 경로</th><th class={th}>필수 항목</th><th class={th}>선택 항목</th></tr></thead>
+                  <tbody>{items.map((r) => <tr><td class={`${td} font-medium text-foreground`}>{r.how}</td><td class={td}>{r.required}</td><td class={td}>{r.optional}</td></tr>)}</tbody>
+                </table>
+              </div>
+              <p class={p}>
+                <strong class="font-semibold text-foreground">민감정보·고유식별정보.</strong> 사건 내용에 피해 경위, 금융거래 내역, 상대방 정보 등이 포함될 수 있으며, 사건 수임 시 본인확인을 위해 주민등록번호 등 고유식별정보를 처리할 수 있습니다. 이는 「변호사법」, 「민사소송법」, 「형사소송법」 등 법령에 근거하거나 정보주체의 별도 동의를 받아 처리합니다.
+              </p>
+              <p class={p}><strong class="font-semibold text-foreground">만 14세 미만 아동.</strong> 로펌은 만 14세 미만 아동의 개인정보를 원칙적으로 수집하지 않으며, 필요한 경우 법정대리인의 동의를 받습니다.</p>
+            </section>
+
+            <!-- 3 -->
+            <section id="retention">
+              <h2 class={h2}>제3조 (개인정보의 처리 및 보유 기간)</h2>
+              <p class={p}>로펌은 법령에 따른 보유 기간 또는 정보주체로부터 동의받은 기간 내에서 개인정보를 처리·보유합니다. 기간이 경과하거나 처리 목적이 달성되면 지체 없이 파기합니다.</p>
+              <div class="mt-4 overflow-x-auto rounded-lg border border-border">
+                <table class="w-full border-collapse">
+                  <thead><tr><th class={th}>구분</th><th class={th}>보유 기간</th><th class={th}>근거</th></tr></thead>
+                  <tbody>{retention.map(([a, b, c]) => <tr><td class={`${td} font-medium text-foreground`}>{a}</td><td class={td}>{b}</td><td class={td}>{c}</td></tr>)}</tbody>
+                </table>
+              </div>
+              <p class={p}>다만, 수사·재판·분쟁이 진행 중인 경우 해당 절차가 종료될 때까지 보유할 수 있습니다.</p>
+            </section>
+
+            <!-- 4 -->
+            <section id="third-party">
+              <h2 class={h2}>제4조 (개인정보의 제3자 제공)</h2>
+              <p class={p}>로펌은 정보주체의 개인정보를 제1조의 목적 범위 내에서만 처리하며, 다음의 경우를 제외하고 제3자에게 제공하지 않습니다.</p>
+              <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+                <li>정보주체가 사전에 별도로 동의한 경우(예: 공동고소·집단소송 참여를 위한 공동 피해자 간 정보 공유)</li>
+                <li>사건 수행을 위해 법원, 수사기관, 금융기관 등에 소장·고소장·보전처분 신청서 등을 제출하는 경우</li>
+                <li>법령에 특별한 규정이 있거나 수사기관이 법령에서 정한 절차와 방법에 따라 요구하는 경우</li>
+                <li>정보주체 또는 그 법정대리인이 의사표시를 할 수 없는 상태에 있거나 주소불명 등으로 사전 동의를 받을 수 없는 경우로서 정보주체 또는 제3자의 급박한 생명·신체·재산의 이익을 위하여 필요하다고 인정되는 경우</li>
+              </ul>
+            </section>
+
+            <!-- 5 -->
+            <section id="outsourcing">
+              <h2 class={h2}>제5조 (개인정보 처리의 위탁)</h2>
+              <p class={p}>로펌은 원활한 서비스 제공을 위해 다음과 같이 개인정보 처리 업무를 위탁하고 있으며, 위탁계약 시 「개인정보 보호법」 제26조에 따라 목적 외 처리 금지, 기술적·관리적 보호조치, 재위탁 제한, 손해배상 등을 명시하고 수탁자가 안전하게 처리하는지 감독합니다. 위탁 업무의 내용이나 수탁자가 변경되면 본 방침을 통해 지체 없이 공개합니다.</p>
+              <div class="mt-4 overflow-x-auto rounded-lg border border-border">
+                <table class="w-full border-collapse">
+                  <thead><tr><th class={th}>위탁 업무</th><th class={th}>수탁자</th><th class={th}>위탁 항목</th></tr></thead>
+                  <tbody>{processors.map(([a, b, c]) => <tr><td class={`${td} font-medium text-foreground`}>{a}</td><td class={td}>{b}</td><td class={td}>{c}</td></tr>)}</tbody>
+                </table>
+              </div>
+              <p class={p}><strong class="font-semibold text-foreground">국외 이전.</strong> 웹 호스팅 사업자의 서버가 국외에 소재할 수 있습니다. 이 경우 이전되는 항목은 접수 폼 데이터와 접속 로그에 한정되며, 전송 구간 암호화 등 보호조치를 적용합니다. 정보주체는 국외 이전을 거부할 수 있으나 이 경우 웹 접수 폼 이용이 제한되며 전화 상담으로 대체할 수 있습니다.</p>
+            </section>
+
+            <!-- 6 -->
+            <section id="rights">
+              <h2 class={h2}>제6조 (정보주체와 법정대리인의 권리·의무 및 행사 방법)</h2>
+              <p class={p}>정보주체는 로펌에 대해 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+              <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                {rights.map((r) => <li class="flex items-center gap-2 rounded-md card-lux px-3 py-2.5 text-sm text-foreground"><Icons name="check" class="h-4 w-4 shrink-0 text-primary" />{r}</li>)}
+              </ul>
+              <ul class="mt-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+                <li>권리 행사는 전화({SITE.phone}), 서면, 전자우편 등을 통해 할 수 있으며, 로펌은 지체 없이 조치합니다.</li>
+                <li>법정대리인이나 위임을 받은 자 등 대리인을 통해 행사하는 경우 「개인정보 보호법 시행규칙」 별지 제11호 서식에 따른 위임장을 제출해야 합니다.</li>
+                <li>열람 및 처리정지 요구는 「개인정보 보호법」 제35조 제4항, 제37조 제2항에 의하여 권리가 제한될 수 있습니다.</li>
+                <li>다른 법령에서 수집 대상으로 명시된 개인정보의 정정·삭제는 요구할 수 없으며, 사건 수행에 필수적인 정보의 삭제를 요구하는 경우 위임사무 수행이 중단될 수 있습니다.</li>
+                <li>로펌은 권리 행사 요구를 한 자가 본인이거나 정당한 대리인인지 확인합니다.</li>
+              </ul>
+            </section>
+
+            <!-- 7 -->
+            <section id="destroy">
+              <h2 class={h2}>제7조 (개인정보의 파기 절차 및 방법)</h2>
+              <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+                <li><strong class="font-semibold text-foreground">파기 절차:</strong> 보유 기간이 경과하거나 처리 목적이 달성된 개인정보는 개인정보 보호책임자의 승인을 거쳐 파기합니다. 법령에 따라 보존해야 하는 정보는 별도의 저장소로 옮겨 보존하며 다른 목적으로 이용하지 않습니다.</li>
+                <li><strong class="font-semibold text-foreground">파기 방법:</strong> 전자 파일은 복구할 수 없는 방법으로 영구 삭제하고, 종이 문서(사건 기록, 신분증 사본 등)는 분쇄하거나 소각합니다.</li>
+              </ul>
+            </section>
+
+            <!-- 8 -->
+            <section id="security">
+              <h2 class={h2}>제8조 (개인정보의 안전성 확보 조치)</h2>
+              <p class={p}>로펌은 「개인정보 보호법」 제29조에 따라 다음과 같은 조치를 취하고 있습니다.</p>
+              <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                {security.map(([a, b]) => (
+                  <div class="rounded-lg card-lux p-4">
+                    <p class="text-sm font-bold text-foreground">{a}</p>
+                    <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <!-- 9 -->
+            <section id="cookies">
+              <h2 class={h2}>제9조 (개인정보 자동 수집 장치의 설치·운영 및 거부)</h2>
+              <p class={p}>서비스는 이용 통계와 광고 성과 측정을 위해 쿠키 및 유사 기술을 사용할 수 있습니다. 쿠키는 이용자의 브라우저에 저장되는 소량의 정보로, 이용자를 직접 식별하지 않습니다.</p>
+              <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+                <li>이용 목적: 방문·검색 기록 분석, 광고 유입 경로 및 전환 측정</li>
+                <li>거부 방법: 브라우저 설정에서 쿠키 저장을 거부하거나 삭제할 수 있습니다. (예: Chrome → 설정 → 개인정보 및 보안 → 쿠키)</li>
+                <li>쿠키 저장을 거부해도 상담 접수와 전화 상담 이용에는 제한이 없습니다.</li>
+              </ul>
+            </section>
+
+            <!-- 10 -->
+            <section id="officer">
+              <h2 class={h2}>제10조 (개인정보 보호책임자)</h2>
+              <p class={p}>로펌은 개인정보 처리에 관한 업무를 총괄하고 정보주체의 불만 처리 및 피해 구제를 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.</p>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div class="rounded-lg card-lux p-5">
+                  <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">개인정보 보호책임자</p>
+                  <p class="mt-2 text-base font-bold text-foreground">{SITE.firm.lawyer}</p>
+                  <p class="text-sm text-muted-foreground">{firm} 대표변호사</p>
+                  <a href={SITE.phoneHref} class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary"><Icons name="phone" class="h-4 w-4 text-primary" />{SITE.phone}</a>
+                </div>
+                <div class="rounded-lg card-lux p-5">
+                  <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">열람·정정·삭제 청구 접수</p>
+                  <p class="mt-2 text-sm leading-relaxed text-foreground">{firm} 강남 본사무소</p>
+                  <p class="text-sm leading-relaxed text-muted-foreground">서울특별시 강남구 영동대로 621, 621빌딩 11층</p>
+                  <p class="mt-1 text-sm text-muted-foreground">전화 {SITE.phone} · 평일 09:00~18:00 (긴급 상담 24시간)</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- 11 -->
+            <section id="remedy">
+              <h2 class={h2}>제11조 (권익침해 구제 방법)</h2>
+              <p class={p}>정보주체는 개인정보 침해에 대한 피해 구제, 상담 등을 아래 기관에 문의할 수 있습니다. 로펌의 자체 처리 결과에 만족하지 못하거나 보다 자세한 도움이 필요한 경우 이용하시기 바랍니다.</p>
+              <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+                {remedies.map((r) => (
+                  <li class="rounded-lg card-lux p-4">
+                    <p class="text-sm font-bold text-foreground">{r.name}</p>
+                    {r.org && <p class="text-xs text-muted-foreground">{r.org}</p>}
+                    <p class="mt-1.5 text-sm text-muted-foreground">{r.tel}</p>
+                    <a href={r.url} target="_blank" rel="noopener" class="text-xs text-primary hover:underline">{r.url.replace('https://', '')}</a>
+                  </li>
+                ))}
+              </ul>
+              <p class={p}>또한 공공기관의 장이 개인정보 처리와 관련하여 행한 처분 또는 부작위로 권리·이익을 침해받은 경우 「행정심판법」에 따라 행정심판을 청구할 수 있습니다.</p>
+            </section>
+
+            <!-- 12 -->
+            <section id="changes">
+              <h2 class={h2}>제12조 (개인정보처리방침의 변경)</h2>
+              <p class={p}>본 방침은 {EFFECTIVE}부터 적용됩니다. 법령·정책 또는 로펌 내부 방침의 변경에 따라 내용이 추가·삭제·수정될 경우 시행 7일 전부터 서비스 화면을 통해 고지하며, 정보주체의 권리에 중대한 변경이 있는 경우 최소 30일 전에 고지합니다.</p>
+              <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                <li>공고일: {EFFECTIVE}</li>
+                <li>시행일: {EFFECTIVE}</li>
+              </ul>
+            </section>
+          </div>
+
+          <div class="mt-12 border-t border-border pt-6">
+            <a class="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="/"><Icons name="arrow-left" class="h-4 w-4" />홈으로 돌아가기</a>
+          </div>
+        </article>
+      </div>
+    </main>
+    <Footer />
+  </div>
+  <BottomBar />
+</BaseLayout>

@@ -1,0 +1,271 @@
+---
+/**
+ * 사건 상세 공용 템플릿 — DB 행 하나(FraudCase)로 페이지 전체를 그린다.
+ * 경고 띠 → 히어로 → 지금 이 3가지 → 회수 증빙 슬라이드 → 비교표 → (모바일: 접수 폼) → FAQ, 데스크톱은 오른쪽 고정 접수 폼.
+ * 라우트: src/pages/rcvlist/[slug].astro 가 getStaticPaths 로 사건마다 이 템플릿을 호출.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import BottomBar from '@/components/BottomBar.astro';
+import Reveal from '@/components/Reveal.astro';
+import Icons from '@/components/Icons.astro';
+import CaseResults from '@/components/CaseResults.astro';
+import { SITE } from '@/site.config';
+import type { FraudCase } from '@/data/cases';
+
+/** 공용 템플릿: 사건 한 건(FraudCase)을 받아 상세 페이지 전체를 렌더링 */
+interface Props { c: FraudCase }
+const { c } = Astro.props;
+const pageUrl = `${SITE.url}/rcvlist/${encodeURIComponent(c.slug)}`;
+const pageTitle = `${c.detailTitle} 피해금 추적 · 계좌 동결`;
+const title = `${pageTitle} | ${SITE.name}`;
+const description = `${c.name} 사칭 사기 피해금을 자금 흐름 추적, 계좌 동결, 긴급 가압류, 민사·형사 병행으로 회수합니다. 24시간 상담.`;
+
+/** 지금 당장 할 일 */
+const urgent = [
+  { icon: 'ban', title: '한 푼도 더 보내지 마세요', desc: '"출금하려면 세금·보증금을 먼저 내라"는 말은 마지막까지 짜내는 수법입니다. 보내는 순간 그 돈도 사라집니다.' },
+  { icon: 'file-text', title: '대화방을 나가지 마세요', desc: '채팅방·앱·입금 내역이 곧 증거이자 추적 단서입니다. 지우면 돈의 행방을 잃습니다.' },
+  { icon: 'snowflake', title: '계좌가 비기 전에 묶으세요', desc: '사기범 계좌에 돈이 남아 있는 지금만 동결할 수 있습니다. 신고와 별도로 법원 보전 처분이 필요합니다.' },
+] as const;
+
+const compare = [
+  ['돈의 행방', '계좌·코인 추적', '모름'],
+  ['계좌 동결', '즉시 가압류 신청', '수사 끝날 때까지 대기'],
+  ['회수', '묶어 둔 돈 환수', '남은 돈 없으면 불가'],
+  ['시작 시점', '접수 당일', '수개월 뒤'],
+];
+
+const faq = [
+  { q: `${c.name} 사칭 사기, 정말 돌려받을 수 있나요?`, a: '사기범 계좌에 돈이 남아 있거나 추적되는 자산이 있으면 묶어서 돌려받을 수 있습니다. 빨리 움직일수록 남아 있는 돈이 많습니다.' },
+  { q: '경찰에 신고했는데 왜 아무 연락이 없나요?', a: '경찰은 범인을 잡는 데 집중합니다. 돈을 묶는 보전 처분은 피해자가 법원에 따로 신청해야 하고, 그 사이 돈은 빠져나갑니다.' },
+  { q: '증거가 카톡 대화뿐입니다.', a: '입금 내역, 대화, 앱 화면이면 시작할 수 있습니다. 부족한 자료는 저희가 보완합니다. 지우지만 마세요.' },
+  { q: '비용이 걱정됩니다.', a: '상담은 무료입니다. 수임 비용은 피해 규모와 회수 가능성을 보고 서면으로 안내하며, 상담 후 결정하셔도 됩니다.' },
+  { q: '가족이 알게 될까 두렵습니다.', a: '변호사 비밀유지 의무로 보호됩니다. 가족·직장에 연락하지 않습니다.' },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: pageTitle,
+      image: `${SITE.url}/og.jpg`,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@id': `${SITE.url}/#website` },
+      about: { '@type': 'Thing', name: `${c.name} 사칭 사기` },
+      description,
+      dateModified: c.date,
+      breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
+      mainEntity: { '@id': `${SITE.url}/#legalservice` },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE.url}/` },
+        { '@type': 'ListItem', position: 2, name: '사칭 목록', item: `${SITE.url}/#cases` },
+        { '@type': 'ListItem', position: 3, name: c.detailTitle, item: pageUrl },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${pageUrl}#faq`,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@id': `${pageUrl}#webpage` },
+      mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    },
+  ],
+};
+
+const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30';
+---
+<BaseLayout title={title} description={description} type="article" schema={schema}>
+  <div class="flex min-h-screen flex-col bg-background">
+    <Header />
+    <main class="flex-1">
+      <!-- 브레드크럼 -->
+      <nav aria-label="브레드크럼" class="border-b border-border marble-section-strong">
+        <div class="mx-auto flex w-full max-w-6xl items-center gap-1.5 px-4 py-3 text-xs text-muted-foreground sm:px-6">
+          <a class="hover:text-foreground" href="/">홈</a>
+          <Icons name="chevron-right" class="h-3.5 w-3.5" />
+          <a class="hover:text-foreground" href="/#cases">사칭 목록</a>
+          <Icons name="chevron-right" class="h-3.5 w-3.5" />
+          <span class="font-medium text-foreground">{c.name}</span>
+        </div>
+      </nav>
+
+      <!-- 경고 띠 -->
+      <div class="border-b border-destructive/30 bg-destructive/10">
+        <div class="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-2.5 text-sm sm:px-6">
+          <span class="relative flex h-2.5 w-2.5 shrink-0">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span>
+            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-destructive"></span>
+          </span>
+          <p class="min-w-0 truncate font-semibold text-foreground"><span class="text-destructive">정상기업 사칭 사기 주의</span> · "{c.name}"에 돈을 보냈다면, 지금 이 순간에도 그 돈은 세탁되고 있습니다.</p>
+        </div>
+      </div>
+
+      <!-- 히어로 -->
+      <section class="relative overflow-hidden border-b border-border bg-hero-dark" aria-labelledby="case-title">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+          <video autoplay loop muted playsinline preload="auto" poster="/hero-poster.jpg" class="h-full w-full object-cover opacity-70">
+            <source src="/hero.mp4" type="video/mp4" />
+          </video>
+          <div class="absolute inset-0 overlay-hero-dark"></div>
+          <div class="absolute inset-0 bg-[radial-gradient(70%_80%_at_20%_30%,color-mix(in_oklab,var(--destructive)_18%,transparent)_0%,transparent_60%)]"></div>
+        </div>
+        <div class="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+          <div data-reveal="0" class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1 text-xs font-bold text-on-dark"><Icons name="triangle-alert" class="h-3.5 w-3.5 text-destructive" />피해 접수 진행 중</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-on-dark/15 bg-on-dark/5 px-3 py-1 text-xs font-semibold text-on-dark/80">사기피해 사건 No. {c.no}</span>
+          </div>
+          <h1 id="case-title" data-reveal="80" class="mt-5 max-w-4xl text-balance text-3xl font-bold leading-tight tracking-tight text-on-dark sm:text-5xl">
+            <span class="text-gold">{c.name}</span> 사칭 사기
+          </h1>
+          <p data-reveal="160" class="mt-4 max-w-2xl text-pretty text-base leading-relaxed text-on-dark/80 sm:text-lg">
+            "{c.name}" 이름을 믿고 보낸 돈, 아직 사기범 계좌에 남아 있을 수 있습니다. 경찰 신고는 범인을 잡는 절차이고, 돈을 되찾는 건 별개입니다. 계좌가 비기 전에 묶어야 합니다.
+          </p>
+
+          <!-- 핵심 수치 -->
+          <dl data-reveal="240" class="mt-8 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="rounded-lg border border-on-dark/10 bg-on-dark/5 p-3 backdrop-blur-sm">
+              <dt class="text-[11px] font-medium text-on-dark/60">등록일</dt><dd class="mt-0.5 font-mono text-sm font-bold text-on-dark"><time datetime={c.date}>{c.date}</time></dd>
+            </div>
+            <div class="rounded-lg border border-on-dark/10 bg-on-dark/5 p-3 backdrop-blur-sm">
+              <dt class="text-[11px] font-medium text-on-dark/60">상태</dt><dd class="mt-0.5 flex items-center gap-1.5 text-sm font-bold text-on-dark"><span class="h-1.5 w-1.5 rounded-full bg-success-soft"></span>진행 중</dd>
+            </div>
+            <div class="rounded-lg border border-on-dark/10 bg-on-dark/5 p-3 backdrop-blur-sm">
+              <dt class="text-[11px] font-medium text-on-dark/60">유형</dt><dd class="mt-0.5 text-sm font-bold text-on-dark">기업·인물 사칭</dd>
+            </div>
+            <div class="rounded-lg border border-destructive/30 bg-destructive/10 p-3 backdrop-blur-sm">
+              <dt class="flex items-center gap-1.5 text-[11px] font-medium text-on-dark/60">
+                <span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-destructive"></span></span>현재 사건 접수
+              </dt>
+              <dd class="mt-0.5 text-sm font-bold text-on-dark"><span class="text-destructive" data-count={c.receipts} data-suffix="건">{c.receipts.toLocaleString()}건</span></dd>
+            </div>
+          </dl>
+
+          <div data-reveal="320" class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a href={SITE.phoneHref} class="inline-flex h-12 items-center justify-center gap-2 rounded-lg btn-gold px-6 text-base font-bold"><Icons name="phone" class="h-5 w-5" />지금 전화하면 바로 추적 시작</a>
+            <a href="#intake" class="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-on-dark/20 bg-on-dark/5 px-6 text-base font-semibold text-on-dark backdrop-blur-sm transition-colors hover:bg-on-dark/10">30초 피해 접수<Icons name="chevron-down" class="h-4 w-4" /></a>
+          </div>
+          <p class="mt-6 max-w-2xl text-[11px] leading-relaxed text-on-dark/40">본 사건은 실제 기업 또는 실제 인물의 명칭을 무단으로 도용한 사칭 사례입니다. 해당 기업 및 인물 역시 명칭이 악용된 또 다른 피해자일 수 있으며, 본 사건과 직접적인 관련이 있다고 단정할 수 없음을 명시합니다.</p>
+        </div>
+      </section>
+
+      <!-- 본문 + 고정 접수 폼 -->
+      <div class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:grid lg:grid-cols-[1fr_380px] lg:grid-rows-[auto_1fr] lg:gap-x-10">
+        <div class="min-w-0 space-y-14 lg:col-start-1 lg:row-start-1">
+          <!-- 1. 지금 당장 할 일 -->
+          <section aria-labelledby="urgent-title">
+            <div data-reveal="0" class="flex items-center gap-2">
+              <span class="flex h-8 w-8 items-center justify-center rounded-md bg-destructive/15 text-destructive"><Icons name="siren" class="h-4 w-4" /></span>
+              <h2 id="urgent-title" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">돈을 되찾으려면, 지금 이 3가지부터</h2>
+            </div>
+            <ol class="mt-5 grid gap-4 sm:grid-cols-3">
+              {urgent.map((u, i) => (
+                <li data-reveal={80 + i * 90} class="card-lux relative overflow-hidden rounded-xl p-5">
+                  <span class="absolute right-4 top-3 font-mono text-4xl font-black text-destructive/15">{i + 1}</span>
+                  <span class="flex h-10 w-10 items-center justify-center rounded-md bg-destructive/15 text-destructive"><Icons name={u.icon} /></span>
+                  <h3 class="mt-4 text-base font-bold text-foreground">{u.title}</h3>
+                  <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">{u.desc}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <!-- 증빙: 실제 회수 사례 슬라이드 -->
+          <CaseResults embedded />
+
+          <!-- 5. 비교 -->
+          <section aria-labelledby="compare-title">
+            <h2 id="compare-title" data-reveal="0" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">신고만 하고 기다리면 어떻게 되나</h2>
+            <div data-reveal="80" class="card-lux mt-6 overflow-hidden rounded-xl">
+              <table class="w-full break-keep text-left text-[13px] sm:text-sm">
+                <thead>
+                  <tr class="border-b border-border bg-secondary/60">
+                    <th scope="col" class="px-3 py-3 font-semibold text-foreground sm:px-4">항목</th>
+                    <th scope="col" class="px-3 py-3 font-semibold text-primary sm:px-4">자금 추적 대응</th>
+                    <th scope="col" class="px-3 py-3 font-semibold text-muted-foreground sm:px-4">단순 고소만 진행</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {compare.map(([item, yes, no]) => (
+                    <tr class="border-b border-border last:border-b-0">
+                      <th scope="row" class="px-3 py-3 text-left font-medium text-foreground sm:px-4">{item}</th>
+                      <td class="px-3 py-3 sm:px-4"><span class="inline-flex items-start gap-1.5 text-foreground"><Icons name="check" class="mt-0.5 h-4 w-4 shrink-0 text-success-soft" />{yes}</span></td>
+                      <td class="px-3 py-3 sm:px-4"><span class="inline-flex items-start gap-1.5 text-muted-foreground"><Icons name="x" class="mt-0.5 h-4 w-4 shrink-0 text-destructive" />{no}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- 오른쪽 고정 접수 폼 -->
+        <aside id="intake" class="mt-14 scroll-mt-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0">
+          <div data-reveal="0" class="card-lux card-lux-gold rounded-2xl p-6 lg:sticky lg:top-24">
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-2 w-2 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-destructive"></span></span>
+              <p class="text-xs font-bold uppercase tracking-wider text-destructive">긴급 피해 접수</p>
+            </div>
+            <h2 class="mt-2 text-xl font-bold leading-snug text-foreground">지금 접수하면<br />오늘 추적을 시작합니다</h2>
+            <p class="mt-2 text-sm leading-relaxed text-muted-foreground">이름·연락처·금액, 세 가지면 됩니다. 30초면 끝납니다.</p>
+
+            <form class="inquiry-form mt-5 space-y-3" novalidate>
+              <input type="hidden" name="caseName" value={c.detailTitle} />
+              <label class="block text-xs font-medium text-foreground">이름 <span class="text-destructive">*</span>
+                <input name="name" data-label="이름" type="text" required placeholder="홍길동" class={inputCls} /></label>
+              <label class="block text-xs font-medium text-foreground">연락처 <span class="text-destructive">*</span>
+                <input name="contact" data-label="연락처" data-phone type="tel" inputmode="numeric" required placeholder="010-0000-0000" class={inputCls} /></label>
+              <label class="block text-xs font-medium text-foreground">피해 금액 <span class="text-destructive">*</span>
+                <input name="amount" data-label="피해 금액" data-amount type="text" inputmode="numeric" required placeholder="예: 30,000,000" class={inputCls} /></label>
+              <button type="submit" class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg btn-gold text-base font-bold">접수하고 추적 시작하기</button>
+            </form>
+
+            <ul class="mt-4 space-y-1.5 text-xs text-muted-foreground">
+              <li class="flex items-center gap-2"><Icons name="check" class="h-3.5 w-3.5 text-success-soft" />접수 즉시 담당자가 확인 후 연락</li>
+              <li class="flex items-center gap-2"><Icons name="check" class="h-3.5 w-3.5 text-success-soft" />야간·주말에도 바로 대응</li>
+              <li class="flex items-center gap-2"><Icons name="lock" class="h-3.5 w-3.5 text-success-soft" />변호사 비밀유지로 가족·직장에 알리지 않음</li>
+            </ul>
+            <div class="mt-4 border-t border-border pt-4">
+              <a href={SITE.phoneHref} class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-input glass-input text-sm font-bold text-foreground transition-colors hover:border-primary hover:text-primary"><Icons name="phone" class="h-4 w-4" />{SITE.phone} 전화 상담</a>
+            </div>
+            <p class="mt-3 text-center text-[11px] text-muted-foreground">제출 시 <a href="/privacy" class="underline hover:text-foreground">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.</p>
+          </div>
+        </aside>
+
+        <div class="min-w-0 space-y-14 pt-14 lg:col-start-1 lg:row-start-2">
+          <!-- 6. FAQ -->
+          <section aria-labelledby="faq-title">
+            <h2 id="faq-title" data-reveal="0" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">자주 묻는 질문</h2>
+            <div data-reveal="80" class="card-lux mt-6 divide-y divide-border overflow-hidden rounded-xl">
+              {faq.map((f, i) => (
+                <details class="group px-5 py-4" open={i === 0}>
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-foreground">
+                    {f.q}
+                    <Icons name="chevron-right" class="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
+                  </summary>
+                  <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <div class="pt-2">
+            <a class="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="/#cases"><Icons name="arrow-left" class="h-4 w-4" />사칭 목록으로 돌아가기</a>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <Footer />
+  </div>
+  <BottomBar caseName={c.name} />
+  <Reveal />
+</BaseLayout>

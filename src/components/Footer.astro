@@ -1,0 +1,86 @@
+---
+/** 푸터 — 상단 연락 띠 + 3열(사무소 / 법인 정보 / 바로가기) + 고지·저작권 */
+import Icons from './Icons.astro';
+import { SITE } from '@/site.config';
+const offices = SITE.offices;
+const links = [
+  { href: '/#cases', label: '사칭 목록' },
+  { href: '/#attr', label: '변호사 소개' },
+  { href: '/#location', label: '오시는 길' },
+  { href: '/privacy', label: '개인정보처리방침' },
+];
+---
+<footer class="border-t border-border marble-section" data-marble="2">
+  <!-- 1. 연락 띠: 가장 먼저 보여야 할 것 -->
+  <div class="border-b border-border bg-secondary/40">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <a href="/" class="flex items-center gap-3">
+        <img src="/logo.png" alt={`${SITE.name} 로고`} width="40" height="40" loading="lazy" class="h-10 w-auto shrink-0" />
+        <span class="flex flex-col leading-tight">
+          <span class="text-base font-bold text-foreground">{SITE.name}</span>
+          <span class="text-xs text-muted-foreground">{SITE.firm.name} · {SITE.tagline}</span>
+        </span>
+      </a>
+      <div class="flex flex-col gap-1 sm:items-end">
+        <a href={SITE.phoneHref} class="inline-flex h-12 items-center justify-center gap-2 rounded-lg btn-gold px-6 text-base font-bold transition-all">
+          <Icons name="phone" class="h-5 w-5" />{SITE.phone}
+        </a>
+        <span class="text-xs text-muted-foreground sm:text-right">24시간 접수 · 초기 상담 무료 · 비밀 보장</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 정보 3열 -->
+  <div class="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.3fr_1fr_0.8fr] md:gap-10">
+    <!-- 사무소 -->
+    <section aria-labelledby="footer-offices">
+      <h2 id="footer-offices" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">사무소</h2>
+      <ul class="mt-3 space-y-4">
+        {offices.map((o, i) => (
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name="map-pin" class="h-4 w-4" /></span>
+            <div class="min-w-0">
+              <p class="flex items-center gap-2 text-sm font-bold text-foreground">
+                {o.label}
+                {i === 0 && <span class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">본점</span>}
+              </p>
+              <p class="mt-0.5 text-sm leading-relaxed text-muted-foreground">{o.address.filter(Boolean).join(' ')}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 법인 정보 -->
+    <section aria-labelledby="footer-firm">
+      <h2 id="footer-firm" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">법인 정보</h2>
+      <dl class="mt-3 space-y-2 text-sm">
+        <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">법인명</dt><dd class="font-medium text-foreground">{SITE.firm.name}</dd></div>
+        <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">광고책임변호사</dt><dd class="font-medium text-foreground"><a href={`/attr/${SITE.firm.lawyerSlug}`} class="hover:text-primary">{SITE.firm.lawyer}</a></dd></div>
+        <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">사업자등록번호</dt><dd class="font-medium text-foreground">{SITE.firm.registration}</dd></div>
+        <div class="flex gap-3"><dt class="w-24 shrink-0 text-muted-foreground">대표전화</dt><dd class="font-medium text-foreground"><a href={SITE.phoneHref} class="hover:text-primary">{SITE.phone}</a></dd></div>
+      </dl>
+    </section>
+
+    <!-- 바로가기 -->
+    <nav aria-labelledby="footer-links">
+      <h2 id="footer-links" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">바로가기</h2>
+      <ul class="mt-3 space-y-2 text-sm">
+        {links.map((l) => (
+          <li><a href={l.href} class="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-primary"><Icons name="chevron-right" class="h-3.5 w-3.5 text-muted-foreground" />{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- 3. 고지 · 저작권 -->
+  <div class="border-t border-border">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-5 text-xs text-muted-foreground sm:px-6">
+      <p class="leading-relaxed">본 페이지는 사기 사건 공동고소 및 형사대응 현황 안내를 위한 자료입니다. 상담 내용은 변호사의 검토를 거쳐 안내되며, 사건의 진행 여부는 사실관계에 따라 달라질 수 있습니다.</p>
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
+        <p>콘텐츠 검토 <a href={`/attr/${SITE.firm.lawyerSlug}`} class="font-medium text-foreground hover:text-primary">{SITE.firm.lawyer}</a> · 최종 업데이트 <time datetime={SITE.updatedAt}>{SITE.updatedAt}</time></p>
+      </div>
+    </div>
+  </div>
+</footer>

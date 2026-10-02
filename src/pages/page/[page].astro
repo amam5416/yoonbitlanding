@@ -1,0 +1,40 @@
+---
+/** 사건 목록 정적 페이지네이션 (/page/2, /page/3 ...) */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Separator from '@/components/Separator.astro';
+import CaseTable from '@/components/CaseTable.astro';
+import Footer from '@/components/Footer.astro';
+import BottomBar from '@/components/BottomBar.astro';
+import Reveal from '@/components/Reveal.astro';
+import { SITE } from '@/site.config';
+import { totalPages, pageHref, TOTAL_CASES } from '@/data/cases';
+import { homeSchema } from '@/data/schema';
+
+export function getStaticPaths() {
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => ({ params: { page: String(i + 2) } }));
+}
+const page = Number(Astro.params.page);
+---
+<BaseLayout
+  title={`사칭 목록 ${page}페이지 | ${SITE.name}`}
+  description={`${SITE.firm.name}가 추적·검토 중인 사칭 사기 사건 ${TOTAL_CASES.toLocaleString()}건 중 ${page}페이지. 피해 업체명을 확인하고 피해금 회수 상담을 신청하세요.`}
+  schema={homeSchema(page)}
+  prev={pageHref(page - 1)}
+  next={page < totalPages ? pageHref(page + 1) : undefined}
+>
+  <div class="flex min-h-screen flex-col bg-background font-sans">
+    <Header />
+    <main class="flex-1">
+      <div class="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
+        <h1 class="text-2xl font-bold tracking-tight text-foreground">사칭 목록 <span class="text-muted-foreground">{page}페이지</span></h1>
+        <p class="mt-2 text-sm text-muted-foreground"><a href="/" class="font-medium text-primary hover:underline">홈에서 검색</a>하거나 아래 목록에서 사건을 선택하세요.</p>
+      </div>
+      <CaseTable page={page} />
+      <Separator />
+    </main>
+    <Footer />
+  </div>
+  <BottomBar />
+  <Reveal />
+</BaseLayout>

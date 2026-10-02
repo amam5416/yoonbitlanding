@@ -1,0 +1,229 @@
+---
+/**
+ * 하단 고정 문의 바 — 데스크톱 인라인 폼 / 모바일 버튼 + 바텀시트.
+ * 필수: 사칭 업체 이름, 이름, 연락처(010 고정·자동 하이픈), 금액(자동 콤마).
+ * 누락 시 <dialog> 팝업으로 빠진 항목 안내. 같은 스크립트가 페이지 내 모든 .inquiry-form 을 처리.
+ */
+import Icons from './Icons.astro';
+import { SITE } from '@/site.config';
+/** caseName 이 있으면(사건 상세) 사칭 업체 이름을 자동 입력하고 입력칸 대신 사건명을 표시 */
+interface Props { caseName?: string }
+const { caseName } = Astro.props;
+const inputCls = 'rounded-md border border-input glass-input px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30';
+const LABEL = caseName ? `${caseName} 피해 접수` : '사칭 업체 피해회복 상담';
+---
+<!-- Desktop -->
+<div class="fixed inset-x-0 bottom-0 z-50 hidden md:block">
+  <div class="border-t glass-strong shadow-elevated-up">
+    <div class="mx-auto flex max-w-[1500px] items-center gap-4 px-4 py-2 lg:px-8">
+      <div class="flex min-w-0 items-center gap-2 text-sm">
+        <span class="relative flex h-2 w-2 shrink-0">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-destructive"></span>
+        </span>
+        <span class="min-w-0 truncate">{caseName ? <><span class="font-bold text-gold">{caseName}</span><span class="ml-1.5 font-medium text-foreground">피해 접수</span></> : <span class="font-medium text-foreground">{LABEL}</span>}</span>
+      </div>
+      <form class="inquiry-form ml-auto flex items-center gap-2" novalidate>
+        {caseName ? (
+          <input type="hidden" name="caseName" value={caseName} />
+        ) : (
+          <>
+            <label class="sr-only" for="iq-casename">사칭 업체 이름 (필수)</label>
+            <input id="iq-casename" name="caseName" data-label="사칭 업체 이름" required placeholder="사칭 업체 이름 *" class={`${inputCls} h-9 w-40`} />
+          </>
+        )}
+        <label class="sr-only" for="iq-name">이름 (필수)</label>
+        <input id="iq-name" name="name" data-label="이름" required placeholder="이름 *" class={`${inputCls} h-9 w-24`} />
+        <label class="sr-only" for="iq-contact">연락처 (필수)</label>
+        <input id="iq-contact" name="contact" data-label="연락처" data-phone required inputmode="numeric" placeholder="010-0000-0000 *" class={`${inputCls} h-9 w-36`} />
+        <label class="sr-only" for="iq-amount">금액 (필수)</label>
+        <input id="iq-amount" name="amount" data-label="피해 금액" data-amount required inputmode="numeric" placeholder="피해 금액(원) *" class={`${inputCls} h-9 w-32`} />
+        <button type="submit" class="h-9 shrink-0 rounded-md btn-gold px-5 text-sm font-bold transition-colors">접수</button>
+        <a href={SITE.phoneHref} class="flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-input glass-input px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"><Icons name="phone" class="h-4 w-4" />전화상담</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile bar -->
+<div class="fixed inset-x-0 bottom-0 z-50 md:hidden">
+  <div class="flex gap-2 border-t glass-strong px-4 py-2.5 shadow-elevated-up">
+    <button type="button" id="sheet-open" class="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl btn-gold text-sm font-bold transition-colors"><Icons name="message-square-text" class="h-4 w-4" />{LABEL}</button>
+    <a href={SITE.phoneHref} class="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-input glass-input px-5 text-sm font-semibold text-foreground"><Icons name="phone" class="h-4 w-4" />전화상담</a>
+  </div>
+</div>
+
+<!-- Mobile sheet -->
+<div id="sheet-backdrop" class="pointer-events-none fixed inset-0 z-[60] bg-foreground/40 opacity-0 backdrop-blur-sm transition-opacity duration-300 md:hidden" aria-hidden="true"></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-label={LABEL} class="fixed inset-x-0 bottom-0 z-[70] translate-y-full rounded-t-2xl border-t glass-strong px-5 pb-8 pt-3 shadow-sheet transition-transform duration-300 md:hidden">
+  <div class="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border"></div>
+  <div class="flex items-start justify-between gap-4">
+    <div class="min-w-0">
+      <p class="text-base font-bold text-foreground">{LABEL}</p>
+      <p class="mt-0.5 text-sm text-muted-foreground">{caseName ? '사건명은 자동으로 들어갑니다. 이름·연락처·금액만 입력하세요.' : <>필수 항목(<span class="text-destructive">*</span>)을 입력하면 바로 연락드립니다.</>}</p>
+      <a href={SITE.phoneHref} class="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-foreground hover:text-primary"><Icons name="phone" class="h-4 w-4 text-primary" />{SITE.phone}</a>
+    </div>
+    <button type="button" id="sheet-close" aria-label="닫기" class="-mr-1.5 -mt-1.5 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Icons name="x" class="h-5 w-5" /></button>
+  </div>
+  <form class="inquiry-form mt-5 space-y-2.5" novalidate>
+    {caseName ? (
+      <div class="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2.5 text-sm">
+        <Icons name="shield-alert" class="h-4 w-4 shrink-0 text-destructive" />
+        <span class="min-w-0 truncate font-semibold text-foreground">{caseName}</span>
+        <span class="ml-auto shrink-0 text-xs text-muted-foreground">자동 입력</span>
+        <input type="hidden" name="caseName" value={caseName} />
+      </div>
+    ) : (
+      <label class="block text-xs font-medium text-foreground">사칭 업체 이름 <span class="text-destructive">*</span>
+        <input name="caseName" data-label="사칭 업체 이름" required placeholder="예: OURBIT, 코인플레이스" class={`${inputCls} mt-1 h-11 w-full`} /></label>
+    )}
+    <label class="block text-xs font-medium text-foreground">이름 <span class="text-destructive">*</span>
+      <input name="name" data-label="이름" required placeholder="홍길동" class={`${inputCls} mt-1 h-11 w-full`} /></label>
+    <label class="block text-xs font-medium text-foreground">연락처 <span class="text-destructive">*</span>
+      <input name="contact" data-label="연락처" data-phone required inputmode="numeric" placeholder="010-0000-0000" class={`${inputCls} mt-1 h-11 w-full`} /></label>
+    <label class="block text-xs font-medium text-foreground">피해 금액 <span class="text-destructive">*</span>
+      <input name="amount" data-label="피해 금액" data-amount required inputmode="numeric" placeholder="예: 30,000,000" class={`${inputCls} mt-1 h-11 w-full`} /></label>
+    <button type="submit" class="mt-1 h-12 w-full shrink-0 rounded-xl btn-gold text-sm font-bold transition-colors">접수</button>
+  </form>
+</div>
+
+<!-- 필수 입력 누락 팝업 -->
+<dialog id="inquiry-dialog" class="m-auto w-[min(92vw,380px)] rounded-2xl border-0 bg-transparent p-0 text-foreground backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+  <div class="card-lux rounded-2xl p-6">
+    <div class="flex items-start gap-3">
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-destructive/15 text-destructive"><Icons name="shield-alert" class="h-5 w-5" /></span>
+      <div class="min-w-0">
+        <p id="inquiry-dialog-title" class="text-base font-bold text-foreground">입력이 필요한 항목이 있습니다</p>
+        <ul id="inquiry-dialog-list" class="mt-2 space-y-1 text-sm text-muted-foreground"></ul>
+      </div>
+    </div>
+    <button type="button" id="inquiry-dialog-close" class="mt-5 h-10 w-full rounded-lg btn-gold text-sm font-bold">확인</button>
+  </div>
+</dialog>
+
+<!-- 접수 중 화면 잠금 -->
+<div id="inquiry-lock" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 backdrop-blur-sm" role="alert" aria-live="assertive" aria-hidden="true">
+  <div class="card-lux card-lux-gold flex flex-col items-center rounded-2xl px-8 py-7 text-center">
+    <span class="h-10 w-10 animate-spin rounded-full border-[3px] border-primary/25 border-t-primary" aria-hidden="true"></span>
+    <p class="mt-4 text-base font-bold text-foreground">접수 중입니다</p>
+    <p class="mt-1 text-sm text-muted-foreground">잠시만 기다려 주세요. 완료 화면으로 이동합니다.</p>
+  </div>
+</div>
+
+<script>
+  // ── 바텀시트 ──
+  const sheet = document.getElementById('sheet')!;
+  const backdrop = document.getElementById('sheet-backdrop')!;
+  const setOpen = (open: boolean) => {
+    sheet.classList.toggle('translate-y-full', !open);
+    backdrop.classList.toggle('opacity-0', !open);
+    backdrop.classList.toggle('pointer-events-none', !open);
+  };
+  document.getElementById('sheet-open')?.addEventListener('click', () => setOpen(true));
+  document.getElementById('sheet-close')?.addEventListener('click', () => setOpen(false));
+  backdrop.addEventListener('click', () => setOpen(false));
+
+  // ── 입력 포맷 ──
+  const digits = (s: string) => s.replace(/\D/g, '');
+  /** 010 고정 + 자동 하이픈: 010-1234-5678 */
+  function formatPhone(raw: string) {
+    let d = digits(raw);
+    // 고정 접두 010 제거. 사용자가 010 을 또 입력한 경우(010-010…)도 한 번 더 제거
+    if (d.startsWith('010')) d = d.slice(3);
+    if (d.startsWith('010')) d = d.slice(3); // 010-010… 처럼 접두를 또 친 경우 (010-0xxx 번호는 존재하지 않음)
+    d = d.slice(0, 8);
+    if (!d) return '010-';
+    if (d.length <= 4) return `010-${d}`;
+    return `010-${d.slice(0, 4)}-${d.slice(4)}`;
+  }
+  /** 자동 콤마 */
+  const formatAmount = (raw: string) => { const d = digits(raw).replace(/^0+(?=\d)/, '').slice(0, 15); return d ? Number(d).toLocaleString('ko-KR') : ''; };
+
+  // 숫자 전용: 글자·기호 입력 자체를 막음 (붙여넣기는 포맷터가 숫자만 남김)
+  const digitsOnly = (el: HTMLInputElement) => {
+    el.setAttribute('pattern', '[0-9,-]*');
+    el.addEventListener('beforeinput', (e) => {
+      const ev = e as InputEvent;
+      if (ev.inputType.startsWith('insert') && ev.data && /\D/.test(ev.data)) e.preventDefault();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) return; // 단축키·방향키·백스페이스 허용
+      if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+  };
+  document.querySelectorAll<HTMLInputElement>('input[data-phone], input[data-amount]').forEach(digitsOnly);
+
+  document.querySelectorAll<HTMLInputElement>('input[data-phone]').forEach((el) => {
+    el.addEventListener('focus', () => { if (!el.value) el.value = '010-'; });
+    el.addEventListener('input', () => { el.value = formatPhone(el.value); });
+    el.addEventListener('blur', () => { if (el.value === '010-') el.value = ''; });
+    // 010- 앞으로 커서가 가지 않게
+    el.addEventListener('keydown', (e) => { if ((e.key === 'Backspace' || e.key === 'ArrowLeft') && (el.selectionStart ?? 0) <= 4 && el.value.startsWith('010-')) e.preventDefault(); });
+  });
+  document.querySelectorAll<HTMLInputElement>('input[data-amount]').forEach((el) => {
+    el.addEventListener('input', () => { el.value = formatAmount(el.value); });
+  });
+
+  // ── 누락 팝업 ──
+  const dialog = document.getElementById('inquiry-dialog') as HTMLDialogElement;
+  const list = document.getElementById('inquiry-dialog-list')!;
+  let focusAfter: HTMLInputElement | null = null;
+  const dialogTitle = document.getElementById('inquiry-dialog-title')!;
+  const showMissing = (items: string[], first: HTMLInputElement | null) => {
+    dialogTitle.textContent = first ? '입력이 필요한 항목이 있습니다' : '접수에 실패했습니다';
+    list.innerHTML = items.map((t) => `<li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-destructive"></span>${t}</li>`).join('');
+    focusAfter = first;
+    dialog.showModal();
+  };
+  const closeDialog = () => { dialog.close(); focusAfter?.focus(); };
+  document.getElementById('inquiry-dialog-close')?.addEventListener('click', closeDialog);
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) closeDialog(); });
+
+  function validate(form: HTMLFormElement): boolean {
+    const missing: string[] = []; let first: HTMLInputElement | null = null;
+    form.querySelectorAll<HTMLInputElement>('input[required], textarea[required]').forEach((el) => {
+      const label = el.dataset.label || el.name;
+      const v = el.value.trim();
+      let bad = '';
+      if (!v || (el.hasAttribute('data-phone') && v === '010-')) bad = `${label}을(를) 입력해 주세요`;
+      else if (el.hasAttribute('data-phone') && digits(v).length !== 11) bad = `${label}: 010 포함 11자리를 입력해 주세요`;
+      else if (el.hasAttribute('data-amount') && Number(digits(v)) <= 0) bad = `${label}: 0보다 큰 금액을 입력해 주세요`;
+      el.classList.toggle('border-destructive', !!bad);
+      if (bad) { missing.push(bad); first ||= el; }
+    });
+    if (missing.length) showMissing(missing, first);
+    return missing.length === 0;
+  }
+
+  // ── 접수 전송 (페이지 내 모든 .inquiry-form) ──
+  const lock = document.getElementById('inquiry-lock')!;
+  function setLocked(on: boolean) {
+    lock.classList.toggle('hidden', !on); lock.classList.toggle('flex', on); lock.setAttribute('aria-hidden', String(!on));
+    // 오버레이를 제외한 모든 요소 비활성화 (버튼·링크·입력 전부 클릭/포커스 불가)
+    Array.from(document.body.children).forEach((el) => { if (el !== lock) (el as HTMLElement).inert = on; });
+    document.body.style.overflow = on ? 'hidden' : '';
+  }
+  const showError = (msg: string) => { showMissing([msg], null); };
+
+  document.querySelectorAll<HTMLFormElement>('.inquiry-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate(form)) return;
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      btn.disabled = true;
+      setLocked(true);
+      const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+      if (data.amount) data.amount = digits(data.amount);
+      try {
+        const res = await fetch('/api/inquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, source: location.href }) });
+        if (!res.ok) throw new Error(String(res.status));
+        // 성공: 잠금 유지한 채 완료 페이지로 이동 (뒤로가기로 폼 재제출 방지 위해 replace)
+        location.replace(`/thanks${data.caseName ? `?case=${encodeURIComponent(data.caseName)}` : ''}`);
+      } catch {
+        setLocked(false);
+        btn.disabled = false;
+        showError('전송에 실패했습니다. 잠시 후 다시 시도하거나 전화로 접수해 주세요.');
+      }
+    });
+  });
+</script>

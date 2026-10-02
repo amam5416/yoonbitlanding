@@ -1,0 +1,203 @@
+---
+/** 변호사 상세 — 왼쪽 고정 프로필 카드 + 오른쪽 이력 */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import BottomBar from '@/components/BottomBar.astro';
+import Reveal from '@/components/Reveal.astro';
+import AttorneyCard from '@/components/AttorneyCard.astro';
+import Icons from '@/components/Icons.astro';
+import { SITE } from '@/site.config';
+import { attorneys, type Attorney } from '@/data/attorneys';
+
+export function getStaticPaths() {
+  return attorneys.map((a) => ({ params: { slug: a.slug }, props: { a } }));
+}
+
+interface Props { a: Attorney }
+const { a } = Astro.props;
+const others = attorneys.filter((o) => o.slug !== a.slug);
+const pageUrl = `${SITE.url}/attr/${a.slug}`;
+const title = `${a.name} ${a.role} | ${SITE.name}`;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ProfilePage',
+      '@id': `${pageUrl}#profilepage`,
+      url: pageUrl,
+      inLanguage: 'ko-KR',
+      isPartOf: { '@id': `${SITE.url}/#website` },
+      breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
+      mainEntity: { '@id': `${pageUrl}#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${pageUrl}#person`,
+      name: a.name,
+      jobTitle: a.role,
+      image: `${SITE.url}${a.img}`,
+      url: pageUrl,
+      worksFor: { '@id': `${SITE.url}/#legalservice` },
+      alumniOf: a.education,
+      knowsAbout: a.areas,
+      hasCredential: a.credentials.map((c) => ({ '@type': 'EducationalOccupationalCredential', name: c })),
+      ...(a.quote ? { description: a.quote } : {}),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '홈', item: `${SITE.url}/` },
+        { '@type': 'ListItem', position: 2, name: '변호사 소개', item: `${SITE.url}/#attr` },
+        { '@type': 'ListItem', position: 3, name: `${a.name} ${a.role}`, item: pageUrl },
+      ],
+    },
+  ],
+};
+---
+<BaseLayout title={title} description={a.description} type="profile" ogImage={a.img} ogImageAlt={`${a.name} ${a.role}`} schema={schema}>
+  <div class="flex min-h-screen flex-col bg-background">
+    <Header />
+    <main class="flex-1">
+      <!-- 브레드크럼 -->
+      <nav aria-label="브레드크럼" class="border-b border-border marble-section">
+        <div class="mx-auto flex w-full max-w-6xl items-center gap-1.5 px-4 py-3 text-xs text-muted-foreground sm:px-6">
+          <a class="hover:text-foreground" href="/">홈</a>
+          <Icons name="chevron-right" class="h-3.5 w-3.5" />
+          <a class="hover:text-foreground" href="/#attr">변호사 소개</a>
+          <Icons name="chevron-right" class="h-3.5 w-3.5" />
+          <span class="font-medium text-foreground">{a.name} {a.role}</span>
+        </div>
+      </nav>
+
+      <!-- 상단 띠 배경 -->
+      <div class="relative overflow-hidden border-b border-border marble-section" data-marble="3">
+        <div class="pointer-events-none absolute inset-0 bg-brand-glow-left" aria-hidden="true"></div>
+        <div class="relative mx-auto w-full max-w-6xl px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-12 lg:grid lg:grid-cols-[320px_1fr] lg:gap-12">
+          <!-- 프로필 카드 (데스크톱 고정) -->
+          <aside data-reveal="0" class="mx-auto w-full max-w-[320px] lg:mx-0 lg:sticky lg:top-24 lg:self-start">
+            <div class="overflow-hidden rounded-2xl card-lux card-lux-gold">
+              <div class="aspect-[4/5] bg-photo">
+                <img src={a.img} alt={`${SITE.firm.name} ${a.name} ${a.role}`} width="520" height="650" fetchpriority="high" class="h-full w-full object-cover" />
+              </div>
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-xl font-bold text-foreground">{a.name}</p>
+                  <span class:list={['rounded-full px-2.5 py-1 text-xs font-semibold', a.role === '대표변호사' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground']}>{a.role}</span>
+                </div>
+                <p class="mt-1 text-sm text-muted-foreground">{SITE.firm.name}</p>
+                <dl class="mt-4 space-y-2 border-t border-border pt-4 text-sm">
+                  <div class="flex items-center gap-2"><Icons name="phone" class="h-4 w-4 shrink-0 text-primary" /><dt class="sr-only">전화</dt><dd><a href={SITE.phoneHref} class="font-semibold text-foreground hover:text-primary">{SITE.phone}</a></dd></div>
+                  <div class="flex items-start gap-2"><Icons name="map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-primary" /><dt class="sr-only">주소</dt><dd class="text-muted-foreground">{SITE.offices[0].address.join(' ')}</dd></div>
+                </dl>
+                <a href={SITE.phoneHref} class="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg btn-gold text-sm font-bold transition-all">
+                  <Icons name="phone" class="h-4 w-4" />{a.name} 변호사 상담
+                </a>
+                <a href="/#cases" class="mt-2 inline-flex h-10 w-full items-center justify-center gap-1 rounded-lg border border-border text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary">사칭 목록 보기<Icons name="chevron-right" class="h-4 w-4" /></a>
+              </div>
+            </div>
+          </aside>
+
+          <!-- 소개 -->
+          <div class="mt-8 lg:mt-0">
+            <div data-reveal="80">
+              <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {a.name}<span class="ml-2 align-middle text-lg font-semibold text-muted-foreground sm:text-xl">{a.role}</span>
+              </h1>
+              <ul class="mt-4 flex flex-wrap gap-2" aria-label="담당 분야">
+                {a.areas.map((t) => <li class="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">{t}</li>)}
+              </ul>
+            </div>
+
+            {a.quote && (
+              <blockquote data-reveal="160" class="mt-6 flex items-start gap-3 rounded-xl border-l-4 border-primary bg-card p-5 shadow-sm">
+                <Icons name="quote" class="mt-0.5 h-5 w-5 shrink-0 text-primary/70" />
+                <p class="text-base font-medium leading-relaxed text-foreground">{a.quote}</p>
+              </blockquote>
+            )}
+
+            <p data-reveal="220" class="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {a.name} {a.role}는 {SITE.firm.name}에서 리딩방·코인 거래소 사칭 사기 피해 사건을 직접 검토합니다. 자금 흐름 분석과 계좌 동결 신청, 형사고소와 민사소송을 함께 진행해 피해금 회수 가능성을 높입니다.
+            </p>
+
+            <!-- 요약 수치 -->
+            <dl data-reveal="280" class="mt-8 grid grid-cols-3 gap-3">
+              <div class="rounded-lg card-lux p-4 text-center">
+                <dt class="text-xs text-muted-foreground">학력</dt><dd class="mt-1 text-2xl font-bold text-foreground">{a.education.length}</dd>
+              </div>
+              <div class="rounded-lg card-lux p-4 text-center">
+                <dt class="text-xs text-muted-foreground">주요 경력</dt><dd class="mt-1 text-2xl font-bold text-foreground">{a.career?.length ?? 0}</dd>
+              </div>
+              <div class="rounded-lg card-lux p-4 text-center">
+                <dt class="text-xs text-muted-foreground">상담</dt><dd class="mt-1 text-2xl font-bold text-primary">24h</dd>
+              </div>
+            </dl>
+
+            <!-- 경력 타임라인 -->
+            {a.career && a.career.length > 0 && (
+              <section data-reveal="0" class="mt-12" aria-labelledby="career-title">
+                <h2 id="career-title" class="flex items-center gap-2 text-lg font-bold text-foreground">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name="briefcase" class="h-4 w-4" /></span>경력
+                </h2>
+                <ol class="relative mt-5 ml-3 border-l-2 border-border pl-6">
+                  {a.career.map((c, i) => (
+                    <li data-reveal={i * 60} class="relative pb-5 last:pb-0">
+                      <span class="absolute -left-[31px] top-1.5 h-3 w-3 rounded-full border-2 border-card bg-primary" aria-hidden="true"></span>
+                      <p class="text-sm font-medium text-foreground sm:text-base">{c}</p>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            <!-- 학력 · 자격 -->
+            <div class="mt-12 grid gap-5 sm:grid-cols-2">
+              <section data-reveal="0" class="rounded-xl card-lux p-6" aria-labelledby="edu-title">
+                <h2 id="edu-title" class="flex items-center gap-2 text-base font-bold text-foreground">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name="graduation-cap" class="h-4 w-4" /></span>학력
+                </h2>
+                <ul class="mt-4 space-y-2.5">
+                  {a.education.map((e) => <li class="flex items-start gap-2.5 text-sm text-foreground/90"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" aria-hidden="true"></span>{e}</li>)}
+                </ul>
+              </section>
+              <section data-reveal="100" class="rounded-xl card-lux p-6" aria-labelledby="cred-title">
+                <h2 id="cred-title" class="flex items-center gap-2 text-base font-bold text-foreground">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary"><Icons name="badge-check" class="h-4 w-4" /></span>자격
+                </h2>
+                <ul class="mt-4 space-y-2.5">
+                  {a.credentials.map((c) => <li class="flex items-start gap-2.5 text-sm text-foreground/90"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" aria-hidden="true"></span>{c}</li>)}
+                </ul>
+              </section>
+            </div>
+
+            <!-- 상담 유도 -->
+            <section data-reveal="0" class="mt-12 overflow-hidden rounded-2xl band-gold p-7 sm:p-9">
+              <h2 class="text-balance text-xl font-bold leading-snug sm:text-2xl">{a.name} 변호사와 사건을 상담하세요</h2>
+              <p class="mt-3 max-w-2xl text-sm leading-relaxed text-foreground/80">사기 피해 사건은 초기 대응이 회수 가능성을 좌우합니다. 전화 한 통이면 변호사가 직접 검토해 대응 방향을 안내드립니다.</p>
+              <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a href={SITE.phoneHref} class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-hero-dark px-5 text-sm font-bold text-on-dark transition-colors hover:bg-hero-dark/85"><Icons name="phone" class="h-4 w-4" />{SITE.phone} 전화 상담</a>
+                <a href="/#cases" class="inline-flex h-11 items-center justify-center gap-1 rounded-lg border border-on-dark/30 px-5 text-sm font-semibold text-on-dark transition-colors hover:bg-on-dark/10">사칭 목록 보기<Icons name="chevron-right" class="h-4 w-4" /></a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- 다른 변호사 -->
+      <section class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6" aria-labelledby="others-title">
+        <div data-reveal="0" class="mb-6 flex items-end justify-between gap-4">
+          <h2 id="others-title" class="text-xl font-bold tracking-tight text-foreground">함께하는 변호사</h2>
+          <a href="/#attr" class="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary"><Icons name="arrow-left" class="h-4 w-4" />변호사 소개로</a>
+        </div>
+        <ul class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {others.map((o, i) => <li data-reveal={100 + i * 120}><AttorneyCard {...o} /></li>)}
+        </ul>
+      </section>
+    </main>
+    <Footer />
+  </div>
+  <BottomBar />
+  <Reveal />
+</BaseLayout>

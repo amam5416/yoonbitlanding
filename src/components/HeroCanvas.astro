@@ -1,0 +1,134 @@
+---
+/**
+ * 히어로 배경 애니메이션 (three.js 파티클 네트워크).
+ * - 장식 전용(aria-hidden). 텍스트는 Hero.astro 의 HTML 에 그대로 있음.
+ * - three.js 는 첫 화면 이후 idle 시점에 동적 import → 초기 번들에 포함되지 않음.
+ * - prefers-reduced-motion / 저사양 기기 / 작은 화면에서는 정적 그라디언트만 표시.
+ * - 화면 밖·탭 비활성 시 렌더 중단, DPR 1.5 제한.
+ */
+---
+<div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+  <!-- 정적 폴백 (항상 렌더, 캔버스가 뜨면 그 위를 덮음) -->
+  <div class="absolute inset-0 bg-brand-glow"></div>
+  <canvas id="hero-canvas" class="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-1000 data-[ready]:opacity-100"></canvas>
+  <!-- 가장자리 페이드 -->
+  <div class="absolute inset-0 overlay-hero-fade"></div>
+</div>
+
+<script>
+  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement | null;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lowEnd = (navigator.hardwareConcurrency || 4) <= 2 || (navigator as any).deviceMemory <= 2;
+  const small = window.innerWidth < 640;
+
+  if (canvas && !reduce && !lowEnd && !small) {
+    const start = () => {
+      const run = () => init(canvas).catch(() => {});
+      'requestIdleCallback' in window ? (window as any).requestIdleCallback(run, { timeout: 2500 }) : setTimeout(run, 800);
+    };
+    document.readyState === 'complete' ? start() : window.addEventListener('load', start, { once: true });
+  }
+
+  async function init(el: HTMLCanvasElement) {
+    const { Scene, OrthographicCamera, WebGLRenderer, BufferGeometry, Float32BufferAttribute, PointsMaterial, Points, LineBasicMaterial, LineSegments, Color } = await import('three');
+
+    const host = el.parentElement as HTMLElement;
+    const renderer = new WebGLRenderer({ canvas: el, alpha: true, antialias: false, powerPreference: 'low-power' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+
+    const scene = new Scene();
+    const camera = new OrthographicCamera(0, 1, 1, 0, -1, 1);
+
+    const N = 110;
+    const LINK = 0.16; // 연결 거리 (정규화 좌표)
+    const pos = new Float32Array(N * 3);
+    const vel = new Float32Array(N * 2);
+    for (let i = 0; i < N; i++) {
+      pos[i * 3] = Math.random();
+      pos[i * 3 + 1] = Math.random();
+      vel[i * 2] = (Math.random() - 0.5) * 0.0006;
+      vel[i * 2 + 1] = (Math.random() - 0.5) * 0.0006;
+    }
+
+    const pGeo = new BufferGeometry();
+    pGeo.setAttribute('position', new Float32BufferAttribute(pos, 3));
+    const css = getComputedStyle(document.documentElement);
+    const tok = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
+    const points = new Points(pGeo, new PointsMaterial({ color: new Color(tok('--canvas-point', '#d6382f')), size: 3, sizeAttenuation: false, transparent: true, opacity: 0.55 }));
+    scene.add(points);
+
+    const maxLines = N * 6;
+    const lPos = new Float32Array(maxLines * 6);
+    const lGeo = new BufferGeometry();
+    lGeo.setAttribute('position', new Float32BufferAttribute(lPos, 3));
+    const lines = new LineSegments(lGeo, new LineBasicMaterial({ color: new Color(tok('--canvas-line', '#9aa4b2')), transparent: true, opacity: 0.35 }));
+    scene.add(lines);
+
+    let w = 1, h = 1, aspect = 1;
+    const resize = () => {
+      w = host.clientWidth; h = host.clientHeight; aspect = w / Math.max(h, 1);
+      renderer.setSize(w, h, false);
+      camera.left = 0; camera.right = aspect; camera.top = 1; camera.bottom = 0;
+      camera.updateProjectionMatrix();
+    };
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    // 마우스 반응 (살짝 끌리는 효과)
+    let mx = -1, my = -1;
+    host.parentElement?.addEventListener('pointermove', (e) => {
+      const r = host.getBoundingClientRect();
+      mx = ((e.clientX - r.left) / r.width) * aspect;
+      my = 1 - (e.clientY - r.top) / r.height;
+    }, { passive: true });
+    host.parentElement?.addEventListener('pointerleave', () => { mx = my = -1; });
+
+    let visible = true, raf = 0;
+    const io = new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) loop(); }, { threshold: 0.05 });
+    io.observe(host);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) loop(); });
+
+    const pArr = pGeo.attributes.position.array as Float32Array;
+    const lArr = lGeo.attributes.position.array as Float32Array;
+
+    function step() {
+      for (let i = 0; i < N; i++) {
+        let x = pArr[i * 3] + vel[i * 2];
+        let y = pArr[i * 3 + 1] + vel[i * 2 + 1];
+        if (mx >= 0) { // 마우스 쪽으로 아주 약하게
+          const dx = mx - x, dy = my - y, d2 = dx * dx + dy * dy;
+          if (d2 < 0.06) { x += dx * 0.0015; y += dy * 0.0015; }
+        }
+        if (x < 0 || x > aspect) vel[i * 2] *= -1;
+        if (y < 0 || y > 1) vel[i * 2 + 1] *= -1;
+        pArr[i * 3] = Math.min(Math.max(x, 0), aspect);
+        pArr[i * 3 + 1] = Math.min(Math.max(y, 0), 1);
+      }
+      let k = 0;
+      for (let i = 0; i < N && k < maxLines; i++) {
+        for (let j = i + 1; j < N && k < maxLines; j++) {
+          const dx = pArr[i * 3] - pArr[j * 3], dy = pArr[i * 3 + 1] - pArr[j * 3 + 1];
+          if (dx * dx + dy * dy < LINK * LINK) {
+            lArr[k * 6] = pArr[i * 3]; lArr[k * 6 + 1] = pArr[i * 3 + 1]; lArr[k * 6 + 2] = 0;
+            lArr[k * 6 + 3] = pArr[j * 3]; lArr[k * 6 + 4] = pArr[j * 3 + 1]; lArr[k * 6 + 5] = 0;
+            k++;
+          }
+        }
+      }
+      lGeo.setDrawRange(0, k * 2);
+      pGeo.attributes.position.needsUpdate = true;
+      lGeo.attributes.position.needsUpdate = true;
+    }
+
+    let last = 0;
+    function loop(t = 0) {
+      cancelAnimationFrame(raf);
+      if (!visible || document.hidden) return;
+      if (t - last > 33) { step(); renderer.render(scene, camera); last = t; } // ~30fps
+      raf = requestAnimationFrame(loop);
+    }
+    renderer.render(scene, camera);
+    el.dataset.ready = '';
+    loop();
+  }
+</script>

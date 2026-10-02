@@ -1,0 +1,40 @@
+---
+/**
+ * 스크롤 등장 애니메이션 + 숫자 카운트업.
+ * - JS 가 켜진 뒤에만 숨김 상태를 적용(html.reveal-ready, BaseLayout <head>)하므로 크롤러·no-JS 환경에서는 항상 보임.
+ * - 짧은 1회성 효과라 prefers-reduced-motion 과 무관하게 재생.
+ */
+---
+<script>
+  // 등장
+  const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        const el = en.target as HTMLElement;
+        el.style.transitionDelay = `${Number(el.dataset.reveal || 0)}ms`;
+        el.classList.add('is-visible');
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+    targets.forEach((t) => io.observe(t));
+  } else {
+    targets.forEach((t) => t.classList.add('is-visible'));
+  }
+
+  // 숫자 카운트업 (HTML 에는 최종 값이 이미 들어 있음)
+  document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+    const end = Number(el.dataset.count);
+    if (!Number.isFinite(end)) return;
+    const suffix = el.dataset.suffix || '';
+    const dur = 1400, t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(end * eased).toLocaleString() + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+</script>

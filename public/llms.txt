@@ -1,0 +1,28 @@
+# 윤빛 금융사기전담본부 (Yoonbit Financial Fraud Task Force)
+> 법무법인 윤빛이 운영하는 사기·사칭 피해금 추적 및 회수 법률 서비스. 사칭 사기 사건을 등록·검색하고, 자금 흐름 추적, 계좌 동결(긴급 가압류), 민사·형사 병행 대응으로 피해금 회수를 지원합니다. 24시간 상담.
+
+Lang: ko
+Operator: 법무법인 윤빛 (Law Firm Yoonbit), 광고책임변호사 윤수빈
+Phone: 1551-4236 (24시간)
+Address: 서울특별시 강남구 영동대로 621, 621빌딩 11층 (강남 본사무소) / 경북 안동시 강남5길 20-26, 2층 201호 (안동 분사무소)
+Business Registration: 754-87-03255
+Sitemap: https://www.yoonbitlaw-fraud.com/sitemap-index.xml
+
+## Key Pages
+- [홈 — 사칭 목록](https://www.yoonbitlaw-fraud.com/): 피해 업체명·플랫폼명 검색, 변호사 소개, 사무소 위치
+- [사건 상세 (예시)](https://www.yoonbitlaw-fraud.com/rcvlist/주-한미컴퍼니): 개별 사칭 사기 사건의 추적 절차, 타임라인, 접수 폼
+- [윤수빈 대표변호사](https://www.yoonbitlaw-fraud.com/attr/yoonsubin)
+- [이화영 변호사](https://www.yoonbitlaw-fraud.com/attr/leehwayoung)
+- [문지나 변호사](https://www.yoonbitlaw-fraud.com/attr/munjina)
+
+## Key Facts
+- 피해금 회수 절차: ① 자금 흐름 분석 → ② 계좌 동결·긴급 가압류 → ③ 민사·형사 소송 병행 → ④ 강제집행 및 환수
+- 긴급 대응 타임라인: 접수 즉시 자금 추적 착수, 24시간 내 보전 조치 검토, 48시간 내 고소장·민사 방향 정리, 72시간 내 추적 보고
+- 경찰 신고만으로는 자산 동결이 자동으로 이루어지지 않으며, 별도의 법원 보전 처분이 필요함
+- 입금 기록, 문자, 카카오톡 대화 등 기본 자료만 있어도 상담 시작 가능
+- 초기 상담 무료, 변호사-의뢰인 비밀유지 원칙 적용
+
+## Attorneys
+- 윤수빈 대표변호사: 성균관대 경영학과, 중앙대 법학전문대학원. 국토부 전세사기 피해지원팀, 경상북도의회 자문변호사, 대법원 국선변호인 등
+- 이화영 변호사: 충남대 경영학과, 충남대 법학전문대학원
+- 문지나 변호사: 성균관대, 전북대 법학전문대학원
