@@ -11,9 +11,13 @@
  *   - partner  고정 "윤빛"
  *
  * WEBHOOK_URL 환경변수가 없으면 DEFAULT_WEBHOOK 으로 보낸다.
+ *
+ * 전달 후 텔레그램(TELEGRAM_CHAT_ID, 기본 -5518606313)으로도 접수 내용을 알린다 (src/lib/telegram.ts).
+ * 텔레그램 실패는 접수 결과에 영향을 주지 않는다.
  */
 import type { APIRoute } from 'astro';
 import { SITE } from '@/site.config';
+import { notifyInquiry } from '@/lib/telegram';
 
 export const prerender = false;
 
@@ -47,22 +51,31 @@ export const POST: APIRoute = async ({ request }) => {
   };
 
   const url = import.meta.env.WEBHOOK_URL || process.env.WEBHOOK_URL || DEFAULT_WEBHOOK;
+  const source = typeof body.source === 'string' ? body.source : undefined;
+
+  let delivered = false;
+  let error = '';
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) {
+    if (res.ok) delivered = true;
+    else {
       const text = await res.text().catch(() => '');
       console.error('[inquiry] webhook failed', res.status, text.slice(0, 300));
-      return json({ ok: false, error: `webhook ${res.status}` }, 502);
+      error = `webhook ${res.status}`;
     }
-    return json({ ok: true, delivered: true });
   } catch (e) {
     console.error('[inquiry] webhook unreachable', (e as Error).message);
-    return json({ ok: false, error: 'webhook unreachable' }, 502);
+    error = 'webhook unreachable';
   }
+
+  // 텔레그램 알림 — 웹훅 성공/실패와 무관하게 보낸다 (실패 시 담당자가 수동 확인할 수 있도록)
+  const telegram = await notifyInquiry({ ...payload, source, delivered });
+
+  return delivered ? json({ ok: true, delivered, telegram }) : json({ ok: false, error, telegram }, 502);
 };
 
 export const GET: APIRoute = () => json({ ok: false, error: 'POST only' }, 405);
