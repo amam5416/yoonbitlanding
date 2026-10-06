@@ -28,7 +28,7 @@ for (let i = 1; i <= totalPages; i++) {
   else if (pages[pages.length - 1] !== '…') pages.push('…');
 }
 const start = (page - 1) * PER_PAGE + 1;
-const end = start + rows.length - 1;
+const end = rows.length ? start + rows.length - 1 : 0;
 ---
 <section id="cases" class="marble-section-strong" data-marble="2" aria-labelledby="cases-title">
   <div class="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-10 sm:px-6">
@@ -41,7 +41,7 @@ const end = start + rows.length - 1;
       <span class="inline-flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1 font-semibold text-destructive">
         <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive" aria-hidden="true"></span>실시간 접수 중
       </span>
-      <span>전체 {TOTAL_CASES.toLocaleString()}건 중 {start}–{end}</span>
+      <span>{rows.length ? `전체 ${TOTAL_CASES.toLocaleString()}건 중 ${start}–${end}` : '접수된 사건 0건'}</span>
     </div>
   </div>
 
@@ -57,6 +57,9 @@ const end = start + rows.length - 1;
         </tr>
       </thead>
       <tbody>
+        {rows.length === 0 && (
+          <tr><td colspan="4" class="px-4 py-12 text-center text-sm text-muted-foreground">아직 등록된 사칭 사건이 없습니다. 피해가 의심되면 아래에서 상담을 신청하세요.</td></tr>
+        )}
         {rows.map((c, i) => {
           const rel = relative(c.date);
           const isNew = rel === '오늘';

@@ -29,11 +29,11 @@ npm run build    # dist/
 
 ## 데이터 (DB → 정적 생성)
 
-- `src/data/cases.ts` — 빌드 시 한 번 실행되는 로더. `DATABASE_URL` 이 있으면 Postgres `keywords` 테이블을 읽고, 없거나 실패하면 `src/data/cases.static.ts` 샘플로 폴백.
-- 테이블: `keywords(id, name, receipt_count, is_active, created_at)`. `name` 한 행 = 목록 한 줄 + `/rcvlist/<slug>` 상세 페이지 하나.
+- `src/data/cases.ts` — 빌드 시 한 번 실행되는 로더. Postgres `keywords` 테이블만 읽는다. `DATABASE_URL` 이 없거나 조회에 실패하면 **빌드가 실패**한다 (샘플 데이터 없음). 행이 0건이면 빈 목록으로 빌드.
+- 테이블: `keywords(id, name, receipt_count, is_active, is_blocked, created_at)`. `name` 한 행 = 목록 한 줄 + `/rcvlist/<slug>` 상세 페이지 하나. `is_active=false` 또는 `is_blocked=true`(관리 도구에서 차단) 는 제외되어 상세 URL 이 404.
   슬러그 규칙: `(주)한미컴퍼니` → `주-한미컴퍼니`, `IG트레이딩 거래소` → `ig트레이딩-거래소` (같은 이름 중복은 최신 행만)
-- 테이블 생성·샘플 입력: `DATABASE_URL=... npm run db:setup`
-- 새 사건이 DB 에 추가되면 다시 빌드/배포해야 페이지가 생깁니다 (Vercel Deploy Hook 을 DB 입력 후 호출하면 자동화 가능).
+- 테이블·컬럼 생성: `DATABASE_URL=... npm run db:setup` (데이터 입력·차단은 관리 도구 [yoonbitadmin](https://github.com/amam5416/yoonbitadmin) 에서)
+- 새 사건이 DB 에 추가되거나 차단되면 다시 빌드/배포해야 반영됩니다. 관리 도구가 Deploy Hook 을 호출한다 (추가 후 "재배포" 버튼, 차단·해제는 자동).
 - 상세 페이지 공용 템플릿: `src/components/CaseDetail.astro` — `FraudCase` 한 건을 props 로 받아 전체 화면을 렌더링. 문구·섹션 수정은 이 파일에서.
 - `src/data/attorneys.ts` — 변호사 프로필. `highlights` 가 홈 카드에, 학력·경력·자격이 상세 페이지에 표시
 - `src/site.config.ts` — 사이트명, 전화, 사무소 주소, 페이지당 행 수

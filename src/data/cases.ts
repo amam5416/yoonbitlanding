@@ -1,12 +1,20 @@
 /**
- * 사건 데이터 로더 — 빌드 타임에 한 번 실행.
- * - DATABASE_URL 이 있으면 Postgres `keywords` 에서 읽음 (is_active=false, is_blocked=true 행은 제외 — 관리 도구 yoonbitadmin 에서 차단)
- * - 없거나 실패하면 src/data/cases.static.ts 샘플로 폴백
+ * 사건 데이터 로더 — 빌드 타임에 한 번 실행. 데이터 출처는 Postgres `keywords` 테이블뿐이다.
+ * - DATABASE_URL 이 없거나 조회에 실패하면 빌드를 중단한다 (가짜 데이터로 배포되는 일이 없도록)
+ * - is_active=false, is_blocked=true 행은 제외 → 상세 페이지가 생성되지 않아 URL 직접 접근 시 404
+ * - 행이 0건이면 빈 목록으로 빌드된다 (관리 도구 yoonbitadmin 에서 키워드를 넣고 재배포)
  * 한 행(name) = 사건 하나 = /rcvlist/<slug> 정적 페이지 하나 (템플릿: src/components/CaseDetail.astro)
  */
 import { SITE } from '@/site.config';
 import { hasDatabase, query } from './db';
-import { STATIC_ROWS, type KeywordRow } from './cases.static';
+
+/** keywords 테이블 행 (관리 도구 yoonbitadmin 이 관리) */
+export interface KeywordRow {
+  id: number;
+  name: string;
+  receipt_count: number;
+  created_at: string; // ISO
+}
 
 export interface FraudCase {
   /** 목록 번호 (DB id) */
@@ -44,33 +52,27 @@ function toCase(row: KeywordRow): FraudCase {
   };
 }
 
-async function loadRows(): Promise<{ rows: KeywordRow[]; source: 'db' | 'static' }> {
-  if (hasDatabase) {
-    try {
-      const rows = await query<KeywordRow>(
-        // 비활성(is_active=false) 과 차단(is_blocked=true) 은 빌드에서 제외 → 상세 페이지가 생성되지 않아 URL 직접 접근 시 404
-        'SELECT id, name, receipt_count, created_at FROM keywords          WHERE COALESCE(is_active, true) AND NOT COALESCE(is_blocked, false)          ORDER BY created_at DESC, id DESC',
-      );
-      if (rows.length) return { rows, source: 'db' };
-      console.warn('[cases] DB 에 행이 없어 샘플 데이터를 사용합니다.');
-    } catch (e) {
-      console.error('[cases] DB 조회 실패, 샘플 데이터 사용:', (e as Error).message);
-    }
+async function loadRows(): Promise<KeywordRow[]> {
+  if (!hasDatabase) {
+    throw new Error('[cases] DATABASE_URL 이 없습니다. 사건 목록은 Postgres keywords 테이블에서만 읽습니다 (.env 또는 Vercel 환경변수에 설정).');
   }
-  return { rows: STATIC_ROWS, source: 'static' };
+  const rows = await query<KeywordRow>(
+    'SELECT id, name, receipt_count, created_at FROM keywords      WHERE COALESCE(is_active, true) AND NOT COALESCE(is_blocked, false)      ORDER BY created_at DESC, id DESC',
+  );
+  if (!rows.length) console.warn('[cases] keywords 테이블에 노출할 행이 없습니다. 빈 목록으로 빌드합니다.');
+  return rows;
 }
 
-const loaded = await loadRows();
-export const DATA_SOURCE = loaded.source;
+const rows = await loadRows();
 
 /** 슬러그 중복 제거 (같은 이름이 두 번 등록된 경우 최신 행만) */
 const seen = new Set<string>();
-export const cases: FraudCase[] = loaded.rows.map(toCase).filter((c) => c.slug && !seen.has(c.slug) && seen.add(c.slug));
+export const cases: FraudCase[] = rows.map(toCase).filter((c) => c.slug && !seen.has(c.slug) && seen.add(c.slug));
 
-console.log(`[cases] ${cases.length}건 로드 (source: ${DATA_SOURCE})`);
+console.log(`[cases] ${cases.length}건 로드 (source: db)`);
 
-/** 히어로의 "현재 N건" 표시용 총 건수 */
-export const TOTAL_CASES = cases.length ? Math.max(cases.length, cases[0].no) : 0;
+/** 히어로·목록의 "현재 N건" — 실제 노출 건수 */
+export const TOTAL_CASES = cases.length;
 
 export const caseHref = (slug: string) => `/rcvlist/${encodeURIComponent(slug)}`;
 export const caseUrl = (slug: string) => `${SITE.url}${caseHref(slug)}`;
