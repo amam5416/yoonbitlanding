@@ -16,8 +16,8 @@ export const SITE = {
     /** 브랜드 엔티티 연결 (GEO) — 실제 채널 URL로 교체. 비어 있으면 출력하지 않음 */
     sameAs: [] as string[],
   },
-  phone: '010-4406-4436',
-  phoneHref: 'tel:01044064436',
+  phone: '010-2862-5653',
+  phoneHref: 'tel:01028625653',
   offices: [
     {
       id: 'gangnam',
