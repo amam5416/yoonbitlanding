@@ -30,7 +30,7 @@ const description = `${c.name} 사칭 사기 피해자라면 지금 확인하세
 /** 검수 변호사 (E-E-A-T: 작성자·검수자와 날짜를 본문과 JSON-LD 양쪽에 표기) */
 const lawyer = attorneys.find((a) => a.slug === SITE.firm.lawyerSlug) ?? attorneys[0];
 const lawyerUrl = `${SITE.url}/attr/${lawyer.slug}`;
-const modified = SITE.updatedAt; // 빌드 날짜 = 마지막 검토일
+const modified = c.date; // 수정 이력 컬럼이 없으므로 등록일과 동일하게 둔다 (빌드일을 넣지 않음)
 
 /** 같은 목록의 다른 사건 (내부 링크: 크롤러가 사건 페이지끼리 오가게) */
 const related = cases.filter((x) => x.slug !== c.slug).slice(0, 4);
@@ -79,18 +79,17 @@ const schema = {
       image: `${SITE.url}/nog.jpg`, // 검색 대표 이미지 (BaseLayout DEFAULT_OG 와 동일)
       inLanguage: 'ko-KR',
       isPartOf: { '@id': `${SITE.url}/#website` },
-      about: { '@type': 'Thing', name: `${c.name} 사칭 사기`, alternateName: [`${c.name} 사기`, `${c.name} 사칭`, `${c.name} 피해`] },
-      keywords: [`${c.name} 사기`, `${c.name} 사칭`, `${c.name} 피해 회수`, '금융사기 피해금 회수', '계좌 동결'].join(', '),
+      about: { '@type': 'Thing', name: `${c.name} 사칭 사기` },
       description,
+      // 날짜는 DB 등록일만 사용 (수정 이력이 없는데 빌드일을 넣으면 자동 생성처럼 보인다)
       datePublished: c.date,
       dateModified: modified,
-      author: { '@id': `${SITE.url}/#legalservice` },
+      author: { '@id': `${lawyerUrl}#person` },
       publisher: { '@id': `${SITE.url}/#legalservice` },
       reviewedBy: { '@id': `${lawyerUrl}#person` },
       // 음성·AI 답변용: 요약 블록을 우선 인용하도록 지정
       speakable: { '@type': 'SpeakableSpecification', cssSelector: ['#case-summary'] },
       breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
-      mainEntity: { '@id': `${SITE.url}/#legalservice` },
     },
     {
       '@type': 'Person',
@@ -206,8 +205,7 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
               <span class="inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider text-primary"><Icons name="file-text" class="h-3.5 w-3.5" />핵심 요약</span>
               <span class="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span>검수 <a href={`/attr/${lawyer.slug}`} rel="author" class="font-semibold text-foreground underline-offset-2 hover:underline">{lawyer.name} {lawyer.role}</a> · {SITE.firm.name}</span>
-                <span>등록 <time datetime={c.date}>{c.date}</time></span>
-                <span>최종 검토 <time datetime={modified}>{modified}</time></span>
+                <span>사건 등록 <time datetime={c.date}>{c.date}</time></span>
               </span>
             </div>
             <h2 id="summary-title" data-reveal="60" class="mt-3 text-lg font-bold tracking-tight text-foreground sm:text-xl">{summary.q1}</h2>

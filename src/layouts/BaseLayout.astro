@@ -55,7 +55,7 @@ const siteSchema = {
       url: `${siteUrl}/`,
       image: ogImage,
       logo: `${siteUrl}/logo.png`,
-      telephone: SITE.phone,
+      telephone: SITE.phoneIntl,
       priceRange: '초기 상담 무료',
       areaServed: { '@type': 'Country', name: 'KR' },
       address: {
@@ -75,14 +75,33 @@ const siteSchema = {
       knowsAbout: ['투자사기', '사칭사기', '리딩방 사기', '피해금 회수', '계좌 동결', '가압류', '집단소송', '보이스피싱'],
       serviceType: ['사기 피해금 추적', '계좌 동결·긴급 가압류', '형사고소 대리', '민사소송', '집단 공동고소'],
       ...(SITE.firm.sameAs.length ? { sameAs: SITE.firm.sameAs } : {}),
+      // 변호사는 이 사업체(전담본부) 소속으로 모델링 — Person.worksFor 와 방향을 맞춘다
+      employee: { '@id': `${siteUrl}/attr/${SITE.firm.lawyerSlug}#person` },
+      subOrganization: { '@id': `${siteUrl}/#andong` },
       parentOrganization: {
         '@type': 'Organization',
         '@id': `${siteUrl}/#lawfirm`,
         name: SITE.firm.name,
         legalName: SITE.firm.name,
         taxID: SITE.firm.registration,
-        employee: { '@id': `${siteUrl}/attr/${SITE.firm.lawyerSlug}#person` },
       },
+    },
+    {
+      // 안동 분사무소 (화면의 오시는 길과 동일하게 두 사무소를 모두 노출)
+      '@type': ['LegalService', 'LocalBusiness'],
+      '@id': `${siteUrl}/#andong`,
+      name: `${SITE.firm.name} 안동 분사무소`,
+      url: `${siteUrl}/#location`,
+      image: ogImage,
+      telephone: SITE.phoneIntl,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '강남5길 20-26, 2층 201호',
+        addressLocality: '안동시',
+        addressRegion: '경상북도',
+        addressCountry: 'KR',
+      },
+      parentOrganization: { '@id': `${siteUrl}/#legalservice` },
     },
     {
       '@type': 'WebSite',

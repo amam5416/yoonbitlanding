@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /privacy
 
 # 검색 엔진
 User-agent: Googlebot
@@ -39,3 +38,18 @@ User-agent: Bytespider
 Disallow: /
 
 Sitemap: https://www.yoonbit.co.kr/sitemap-index.xml
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Daumoa
+Allow: /

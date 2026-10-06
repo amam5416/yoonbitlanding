@@ -57,7 +57,7 @@ const schema = {
   ],
 };
 ---
-<BaseLayout title={title} description={a.description} type="profile" ogImage={a.img} ogImageAlt={`${a.name} ${a.role}`} schema={schema}>
+<BaseLayout title={title} description={`${SITE.firm.name} ${a.name} ${a.role}. ${a.areas.join(', ')} 사건을 직접 검토하고 대응합니다. ${a.highlights.slice(0, 2).join(', ')}. 사기 피해금 추적·계좌 동결 무료 상담.`} type="profile" schema={schema}>
   <div class="flex min-h-screen flex-col bg-background">
     <Header />
     <main class="flex-1">

@@ -20,7 +20,7 @@ export default defineConfig({
     sitemap({
       filter: (page) => !page.includes('/privacy') && !page.includes('/404') && !page.includes('/thanks'),
       serialize(item) {
-        item.lastmod = new Date().toISOString().slice(0, 10);
+        // lastmod 는 넣지 않는다: 실제 수정일을 알 수 없는데 빌드일을 넣으면 모든 URL 이 매번 '변경됨'으로 보여 신뢰를 잃는다
         if (item.url.endsWith('.com/') || item.url.endsWith('.com')) item.priority = 1.0;
         else if (item.url.includes('/rcvlist/')) item.priority = 0.8;
         else item.priority = 0.5;
