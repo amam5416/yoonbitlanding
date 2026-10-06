@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
-import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
@@ -16,18 +15,8 @@ export default defineConfig({
     '/attorneys/[slug]': '/attr/[slug]',
     '/recovery/[slug]': '/rcvlist/[slug]',
   },
-  integrations: [
-    sitemap({
-      filter: (page) => !page.includes('/privacy') && !page.includes('/404') && !page.includes('/thanks'),
-      serialize(item) {
-        // lastmod 는 넣지 않는다: 실제 수정일을 알 수 없는데 빌드일을 넣으면 모든 URL 이 매번 '변경됨'으로 보여 신뢰를 잃는다
-        if (item.url.endsWith('.com/') || item.url.endsWith('.com')) item.priority = 1.0;
-        else if (item.url.includes('/rcvlist/')) item.priority = 0.8;
-        else item.priority = 0.5;
-        return item;
-      },
-    }),
-  ],
+  // 사이트맵은 src/pages/sitemap-index.xml.ts, sitemap-0.xml.ts 가 DB 등록일(lastmod)로 직접 생성
+  integrations: [],
   vite: { plugins: [tailwindcss()] },
   // 4321은 Windows 예약 포트 범위(4262~4361)와 겹쳐 바인딩이 거부됨
   server: { port: 3000, host: '127.0.0.1' },
