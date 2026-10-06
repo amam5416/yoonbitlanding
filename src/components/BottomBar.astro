@@ -141,7 +141,7 @@ const LABEL = caseName ? `${caseName} 피해 접수` : '사칭 업체 피해회�
 
   // 숫자 전용: 글자·기호 입력 자체를 막음 (붙여넣기는 포맷터가 숫자만 남김)
   const digitsOnly = (el: HTMLInputElement) => {
-    el.setAttribute('pattern', '[0-9,-]*');
+    el.setAttribute('pattern', '[0-9,\\-]*'); // 브라우저가 v 플래그로 컴파일하므로 '-' 는 이스케이프 필수
     el.addEventListener('beforeinput', (e) => {
       const ev = e as InputEvent;
       if (ev.inputType.startsWith('insert') && ev.data && /\D/.test(ev.data)) e.preventDefault();
