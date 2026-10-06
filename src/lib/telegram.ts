@@ -55,10 +55,9 @@ export function buildInquiryMessage(n: InquiryNotice): string {
     `💰 피해 금액: ${e(n.amount)}원`,
     '━━━━━━━━━━━━━━',
   ];
-  const src = sourceLabel(n.source);
-  if (src) lines.push(`📍 접수 경로: ${e(src)}`);
   lines.push(`🕐 ${formatKst(n.at ?? new Date())}`);
-  lines.push(n.delivered ? '✅ DAOM 전달 완료' : '⚠️ DAOM 전달 실패 — 수동 확인 필요');
+  // 정상 전달 시에는 아무 표시 없음. 실패했을 때만 경고 한 줄
+  if (!n.delivered) lines.push('⚠️ DAOM 전달 실패 — 수동 확인 필요');
   return lines.join('\n');
 }
 
