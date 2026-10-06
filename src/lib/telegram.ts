@@ -16,7 +16,10 @@ export interface InquiryNotice {
   phone: string;     // "010-1234-5678"
   keyword: string;   // 사칭 업체명
   amount: string;    // "50,000,000"
-  source?: string;   // 접수한 페이지 URL
+  platform: string;  // "윤빛 금융사기전담본부"
+  source?: string;   // 접수한 페이지 URL (유입경로)
+  ip?: string;       // 접수자 IP
+  region?: string;   // 접속 지역 (Vercel 지오 헤더 기반), 모르면 "기타"
   delivered: boolean; // DAOM 웹훅 전달 성공 여부
   at?: Date;
 }
@@ -47,19 +50,41 @@ export const sourceLabel = (source?: string) => {
 export function buildInquiryMessage(n: InquiryNotice): string {
   const e = escapeHtml;
   const lines = [
-    '🚨 <b>새 상담 신청</b>',
-    '━━━━━━━━━━━━━━',
-    `👤 이름: <b>${e(n.name)}</b>`,
-    `📞 연락처: <code>${e(n.phone)}</code>`,
-    `🏢 사칭 업체: <b>${e(n.keyword)}</b>`,
-    `💰 피해 금액: ${e(n.amount)}원`,
-    '━━━━━━━━━━━━━━',
+    '🔔 [윤빛] 신규 고객 접수',
+    '',
+    `👤 ${e(n.name)}  ·  📞 ${e(n.phone)}`,
+    '',
+    `📱 플랫폼  ${e(n.platform)}`,
+    `🔑 키워드  ${e(n.keyword)}`,
+    `💰 피해금액  ${e(n.amount)}원`,
+    '',
+    '👨‍💼 담당자  미배정',
+    `🌐 유입경로  ${e(n.source ? safeDecode(n.source) : '-')}`, // 한글 슬러그를 읽을 수 있게 디코드
+    '',
+    '─ ─ ─ ─ ─ ─ ─ ─ ─',
+    `🖥 ${e(n.ip || '-')}  ·  🌍 ${e(n.region || '기타')}`,
   ];
-  lines.push(`🕐 ${formatKst(n.at ?? new Date())}`);
   // 정상 전달 시에는 아무 표시 없음. 실패했을 때만 경고 한 줄
-  if (!n.delivered) lines.push('⚠️ DAOM 전달 실패 — 수동 확인 필요');
+  if (!n.delivered) lines.push('', '⚠️ DAOM 전달 실패 — 수동 확인 필요');
   return lines.join('\n');
 }
+
+/**
+ * 접수자 IP·지역을 요청 헤더에서 읽는다 (Vercel 이 x-forwarded-for, x-vercel-ip-* 헤더를 붙여 준다).
+ * 지역은 "대한민국 서울" 식으로, 알 수 없으면 "기타".
+ */
+export function requestOrigin(req: Request): { ip?: string; region?: string } {
+  const h = req.headers;
+  const ip = (h.get('x-forwarded-for') || '').split(',')[0].trim() || h.get('x-real-ip') || undefined;
+  const country = h.get('x-vercel-ip-country') || '';
+  if (!country) return { ip, region: '기타' };
+  const city = safeDecode(h.get('x-vercel-ip-city') || '');
+  let countryName = country;
+  try { countryName = new Intl.DisplayNames(['ko'], { type: 'region' }).of(country) ?? country; } catch { /* 알 수 없는 국가 코드면 코드 그대로 */ }
+  return { ip, region: [countryName, city].filter(Boolean).join(' ') };
+}
+
+const safeDecode = (s: string) => { try { return decodeURIComponent(s); } catch { return s; } };
 
 /**
  * 알림 전송. 실패해도 예외를 던지지 않는다 (접수 자체는 웹훅 결과로 판단).

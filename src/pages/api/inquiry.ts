@@ -17,7 +17,7 @@
  */
 import type { APIRoute } from 'astro';
 import { SITE } from '@/site.config';
-import { notifyInquiry } from '@/lib/telegram';
+import { notifyInquiry, requestOrigin } from '@/lib/telegram';
 
 export const prerender = false;
 
@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // 텔레그램 알림 — 웹훅 성공/실패와 무관하게 보낸다 (실패 시 담당자가 수동 확인할 수 있도록)
-  const telegram = await notifyInquiry({ ...payload, source, delivered });
+  const telegram = await notifyInquiry({ ...payload, source, delivered, ...requestOrigin(request) });
 
   return delivered ? json({ ok: true, delivered, telegram }) : json({ ok: false, error, telegram }, 502);
 };
