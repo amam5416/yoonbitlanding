@@ -13,7 +13,8 @@ import Icons from '@/components/Icons.astro';
 import CaseResults from '@/components/CaseResults.astro';
 import Location from '@/components/Location.astro';
 import { SITE } from '@/site.config';
-import type { FraudCase } from '@/data/cases';
+import { cases, caseHref, type FraudCase } from '@/data/cases';
+import { attorneys } from '@/data/attorneys';
 
 /** 공용 템플릿: 사건 한 건(FraudCase)을 받아 상세 페이지 전체를 렌더링 */
 interface Props { c: FraudCase }
@@ -23,7 +24,24 @@ const pageUrl = `${SITE.url}/rcvlist/${encodeURIComponent(c.slug)}`;
 // 브랜드명은 붙이지 않는다 — 네이버는 제목을 짧게 자르므로 핵심 문구만 남기고, 브랜드는 og:site_name 과 JSON-LD 가 전달
 const pageTitle = c.seoTitle;
 const title = c.seoTitle;
-const description = `${c.name} 사칭 사기 피해금을 자금 흐름 추적, 계좌 동결, 긴급 가압류, 민사·형사 병행으로 회수합니다. 24시간 상담.`;
+// 메타 설명: 키워드를 앞에, 검색 의도(피해자·회수 가능 여부)에 바로 답하고, 행동(무료 상담)으로 끝낸다. 네이버 노출 길이 고려 150자 안팎
+const description = `${c.name} 사칭 사기 피해자라면 지금 확인하세요. ${c.name} 이름으로 돈을 보냈다면 사기범 계좌 동결과 자금 추적으로 피해금 회수가 가능할 수 있습니다. 현재 ${c.receipts.toLocaleString()}건 접수 진행 중, 법무법인 윤빛 무료 상담.`;
+
+/** 검수 변호사 (E-E-A-T: 작성자·검수자와 날짜를 본문과 JSON-LD 양쪽에 표기) */
+const lawyer = attorneys.find((a) => a.slug === SITE.firm.lawyerSlug) ?? attorneys[0];
+const lawyerUrl = `${SITE.url}/attr/${lawyer.slug}`;
+const modified = SITE.updatedAt; // 빌드 날짜 = 마지막 검토일
+
+/** 같은 목록의 다른 사건 (내부 링크: 크롤러가 사건 페이지끼리 오가게) */
+const related = cases.filter((x) => x.slug !== c.slug).slice(0, 4);
+
+/** AEO: 질문형 제목 + 첫 문장에서 바로 답하는 요약 블록 (JSON-LD speakable 로도 지정) */
+const summary = {
+  q1: `${c.name} 사칭 사기란 무엇인가요?`,
+  a1: `${c.name} 사칭 사기는 실제 기업·인물인 "${c.name}"의 이름과 신뢰를 도용해 투자금이나 수수료 명목으로 돈을 받아 가로채는 금융사기입니다. 현재 ${SITE.name}에 ${c.receipts.toLocaleString()}건의 피해가 접수되어 진행 중이며, ${c.date}에 사건으로 등록되었습니다.`,
+  q2: `${c.name}에 돈을 보냈다면 어떻게 해야 하나요?`,
+  a2: `첫째, 추가 입금을 멈추세요. "출금하려면 세금·보증금을 내라"는 요구는 전형적인 2차 피해 수법입니다. 둘째, 입금 내역·대화·앱 화면을 지우지 말고 보관하세요. 셋째, 경찰 신고와 별도로 사기범 계좌를 묶는 법원 보전 처분(가압류)을 신청해야 합니다. 경찰 신고는 범인을 잡는 절차이고, 돈을 되찾는 절차는 아닙니다. 피해금 회수는 자금 흐름 분석, 계좌 동결, 민사·형사 병행, 강제집행 순서로 진행되며, 사기범 계좌에 돈이 남아 있을수록 회수 가능성이 높습니다. 초기 상담은 무료이고, 변호사 비밀유지 의무로 가족·직장에 알려지지 않습니다.`,
+};
 
 /** 지금 당장 할 일 */
 const urgent = [
@@ -45,6 +63,8 @@ const faq = [
   { q: '증거가 카톡 대화뿐입니다.', a: '입금 내역, 대화, 앱 화면이면 시작할 수 있습니다. 부족한 자료는 저희가 보완합니다. 지우지만 마세요.' },
   { q: '비용이 걱정됩니다.', a: '상담은 무료입니다. 수임 비용은 피해 규모와 회수 가능성을 보고 서면으로 안내하며, 상담 후 결정하셔도 됩니다.' },
   { q: '가족이 알게 될까 두렵습니다.', a: '변호사 비밀유지 의무로 보호됩니다. 가족·직장에 연락하지 않습니다.' },
+  { q: `${c.name}이(가) 정상 기업인지 어떻게 확인하나요?`, a: `실제 "${c.name}"과 이름이 같아도 연락해 온 쪽이 그 기업이라는 보장은 없습니다. 공식 홈페이지의 대표번호로 직접 확인하고, 금융감독원 제도권 금융회사 조회에서 투자 권유 주체가 등록 업체인지 확인하세요. 개인 계좌 입금, 카카오톡·텔레그램 단체방 권유, 출금 조건으로 추가 입금 요구가 있으면 사칭일 가능성이 매우 높습니다.` },
+  { q: `${c.name} 사칭 사기 피해 접수는 어떻게 하나요?`, a: `이 페이지의 접수 폼에 이름·연락처·피해 금액만 남기거나 전화로 바로 접수할 수 있습니다. 접수 즉시 담당자가 확인해 연락하고, 입금 내역을 바탕으로 자금 흐름 분석과 계좌 동결 가능 여부를 검토합니다. 야간·주말에도 접수됩니다.` },
 ];
 
 const schema = {
@@ -55,14 +75,32 @@ const schema = {
       '@id': `${pageUrl}#webpage`,
       url: pageUrl,
       name: pageTitle,
+      headline: `${c.name} 사칭 사기`,
       image: `${SITE.url}/og.jpg`,
       inLanguage: 'ko-KR',
       isPartOf: { '@id': `${SITE.url}/#website` },
-      about: { '@type': 'Thing', name: `${c.name} 사칭 사기` },
+      about: { '@type': 'Thing', name: `${c.name} 사칭 사기`, alternateName: [`${c.name} 사기`, `${c.name} 사칭`, `${c.name} 피해`] },
+      keywords: [`${c.name} 사기`, `${c.name} 사칭`, `${c.name} 피해 회수`, '금융사기 피해금 회수', '계좌 동결'].join(', '),
       description,
-      dateModified: c.date,
+      datePublished: c.date,
+      dateModified: modified,
+      author: { '@id': `${SITE.url}/#legalservice` },
+      publisher: { '@id': `${SITE.url}/#legalservice` },
+      reviewedBy: { '@id': `${lawyerUrl}#person` },
+      // 음성·AI 답변용: 요약 블록을 우선 인용하도록 지정
+      speakable: { '@type': 'SpeakableSpecification', cssSelector: ['#case-summary'] },
       breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
       mainEntity: { '@id': `${SITE.url}/#legalservice` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${lawyerUrl}#person`,
+      name: lawyer.name,
+      jobTitle: lawyer.role,
+      url: lawyerUrl,
+      image: `${SITE.url}${lawyer.img}`,
+      worksFor: { '@id': `${SITE.url}/#legalservice` },
+      knowsAbout: lawyer.areas,
     },
     {
       '@type': 'BreadcrumbList',
@@ -85,7 +123,7 @@ const schema = {
 
 const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30';
 ---
-<BaseLayout title={title} description={description} type="article" schema={schema}>
+<BaseLayout title={title} description={description} type="article" schema={schema} publishedTime={c.date} modifiedTime={modified}>
   <div class="flex min-h-screen flex-col bg-background">
     <Header />
     <main class="flex-1">
@@ -162,6 +200,22 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
       <!-- 본문 + 고정 접수 폼 -->
       <div class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:grid lg:grid-cols-[1fr_380px] lg:grid-rows-[auto_1fr] lg:gap-x-10">
         <div class="min-w-0 space-y-14 lg:col-start-1 lg:row-start-1">
+          <!-- 0. 핵심 요약 (AEO/GEO): 질문형 제목 + 첫 문장에서 바로 답. 검색엔진·AI 가 인용하기 쉬운 자기완결 문단 -->
+          <section id="case-summary" aria-labelledby="summary-title" class="card-lux rounded-xl p-5 sm:p-6">
+            <div data-reveal="0" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <span class="inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider text-primary"><Icons name="file-text" class="h-3.5 w-3.5" />핵심 요약</span>
+              <span class="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>검수 <a href={`/attr/${lawyer.slug}`} rel="author" class="font-semibold text-foreground underline-offset-2 hover:underline">{lawyer.name} {lawyer.role}</a> · {SITE.firm.name}</span>
+                <span>등록 <time datetime={c.date}>{c.date}</time></span>
+                <span>최종 검토 <time datetime={modified}>{modified}</time></span>
+              </span>
+            </div>
+            <h2 id="summary-title" data-reveal="60" class="mt-3 text-lg font-bold tracking-tight text-foreground sm:text-xl">{summary.q1}</h2>
+            <p data-reveal="120" class="mt-2 text-sm leading-relaxed text-foreground/90 sm:text-[15px]">{summary.a1}</p>
+            <h2 data-reveal="180" class="mt-5 text-lg font-bold tracking-tight text-foreground sm:text-xl">{summary.q2}</h2>
+            <p data-reveal="240" class="mt-2 text-sm leading-relaxed text-foreground/90 sm:text-[15px]">{summary.a2}</p>
+          </section>
+
           <!-- 1. 지금 당장 할 일 -->
           <section aria-labelledby="urgent-title">
             <div data-reveal="0" class="flex items-center gap-2">
@@ -259,6 +313,23 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
               ))}
             </div>
           </section>
+
+          <!-- 7. 다른 사칭 사건 (내부 링크) -->
+          {related.length > 0 && (
+            <section aria-labelledby="related-title">
+              <h2 id="related-title" data-reveal="0" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">지금 접수 중인 다른 사칭 사건</h2>
+              <ul data-reveal="80" class="card-lux mt-6 divide-y divide-border overflow-hidden rounded-xl">
+                {related.map((r) => (
+                  <li>
+                    <a href={caseHref(r.slug)} class="flex items-center justify-between gap-4 px-5 py-3.5 text-sm transition-colors hover:bg-secondary/40">
+                      <span class="min-w-0 truncate font-semibold text-foreground">{r.title}</span>
+                      <span class="flex shrink-0 items-center gap-3 text-xs text-muted-foreground"><time datetime={r.date}>{r.date}</time><Icons name="chevron-right" class="h-4 w-4" /></span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <div class="pt-2">
             <a class="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground" href="/#cases"><Icons name="arrow-left" class="h-4 w-4" />사칭 목록으로 돌아가기</a>
