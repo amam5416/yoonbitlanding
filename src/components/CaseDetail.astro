@@ -19,8 +19,10 @@ import type { FraudCase } from '@/data/cases';
 interface Props { c: FraudCase }
 const { c } = Astro.props;
 const pageUrl = `${SITE.url}/rcvlist/${encodeURIComponent(c.slug)}`;
-const pageTitle = `${c.detailTitle} 피해금 추적 · 계좌 동결`;
-const title = `${pageTitle} | ${SITE.name}`;
+// 검색엔진 노출 제목: "<키워드> 사기 사칭 | <꼬리 문구>" (꼬리는 키워드별로 고정 선택, src/data/cases.ts SEO_TITLE_TAILS)
+// 브랜드명은 붙이지 않는다 — 네이버는 제목을 짧게 자르므로 핵심 문구만 남기고, 브랜드는 og:site_name 과 JSON-LD 가 전달
+const pageTitle = c.seoTitle;
+const title = c.seoTitle;
 const description = `${c.name} 사칭 사기 피해금을 자금 흐름 추적, 계좌 동결, 긴급 가압류, 민사·형사 병행으로 회수합니다. 24시간 상담.`;
 
 /** 지금 당장 할 일 */

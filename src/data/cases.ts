@@ -27,6 +27,8 @@ export interface FraudCase {
   title: string;
   /** 상세 제목: "<name> 관련 사칭 사기" */
   detailTitle: string;
+  /** 검색엔진 노출 제목(<title>·og:title): "<name> 사기 사칭 | <SEO_TITLE_TAILS 중 하나>" */
+  seoTitle: string;
   status: '사건진행중';
   /** YYYY-MM-DD */
   date: string;
@@ -38,6 +40,33 @@ export interface FraudCase {
 export const toSlug = (n: string) =>
   n.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
 
+/**
+ * 네이버·구글에 노출되는 상세 페이지 제목 꼬리. 키워드마다 하나가 선택된다.
+ * 선택은 키워드 이름의 해시로 결정해서, 빌드를 다시 해도 같은 키워드는 항상 같은 제목을 유지한다
+ * (빌드마다 제목이 바뀌면 검색엔진이 매번 재평가해 순위에 불리).
+ */
+export const SEO_TITLE_TAILS = [
+  '피해자라면 반드시 확인하세요',
+  '피해 발생시 대응 방법',
+  '내 피해금 회수 가능성 확인',
+  '피해자라면 지금 확인해야 할 사항',
+  '피해 사례 및 대응 절차 안내',
+  '피해자 상담, 대응 접수',
+  '금융사기 피해 공동대응',
+  '피해자 공동대응센터',
+  '금융사기 피해자 공동대응',
+  '함께 대응하는 방법',
+] as const;
+
+/** 문자열 → 0 이상 정수 (FNV-1a). 키워드별로 고정된 "랜덤" 선택에 사용 */
+const hash = (s: string) => {
+  let h = 0x811c9dc5;
+  for (const ch of s) { h ^= ch.codePointAt(0)!; h = Math.imul(h, 0x01000193) >>> 0; }
+  return h;
+};
+
+export const seoTitleFor = (name: string) => `${name} 사기 사칭 | ${SEO_TITLE_TAILS[hash(name) % SEO_TITLE_TAILS.length]}`;
+
 function toCase(row: KeywordRow): FraudCase {
   const name = String(row.name).trim();
   return {
@@ -46,6 +75,7 @@ function toCase(row: KeywordRow): FraudCase {
     name,
     title: `${name} 사칭 사기`,
     detailTitle: `${name} 관련 사칭 사기`,
+    seoTitle: seoTitleFor(name),
     status: '사건진행중',
     date: new Date(row.created_at).toISOString().slice(0, 10),
     receipts: Number(row.receipt_count ?? 0),
