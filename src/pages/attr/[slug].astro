@@ -32,19 +32,7 @@ const schema = {
       breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
       mainEntity: { '@id': `${pageUrl}#person` },
     },
-    {
-      '@type': 'Person',
-      '@id': `${pageUrl}#person`,
-      name: a.name,
-      jobTitle: a.role,
-      image: `${SITE.url}${a.img}`,
-      url: pageUrl,
-      worksFor: { '@id': `${SITE.url}/#legalservice` },
-      alumniOf: a.education,
-      knowsAbout: a.areas,
-      hasCredential: a.credentials.map((c) => ({ '@type': 'EducationalOccupationalCredential', name: c })),
-      ...(a.quote ? { description: a.quote } : {}),
-    },
+    // Person 노드는 BaseLayout 사이트 공통 스키마에 있음 (mainEntity 가 거기로 해소)
     {
       '@type': 'BreadcrumbList',
       '@id': `${pageUrl}#breadcrumb`,

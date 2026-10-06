@@ -1,6 +1,8 @@
 ---
 import '@/styles/global.css';
 import { SITE } from '@/site.config';
+import { attorneys } from '@/data/attorneys';
+import { personSchema } from '@/data/schema';
 
 interface Props {
   title?: string;
@@ -75,8 +77,8 @@ const siteSchema = {
       knowsAbout: ['투자사기', '사칭사기', '리딩방 사기', '피해금 회수', '계좌 동결', '가압류', '집단소송', '보이스피싱'],
       serviceType: ['사기 피해금 추적', '계좌 동결·긴급 가압류', '형사고소 대리', '민사소송', '집단 공동고소'],
       ...(SITE.firm.sameAs.length ? { sameAs: SITE.firm.sameAs } : {}),
-      // 변호사는 이 사업체(전담본부) 소속으로 모델링 — Person.worksFor 와 방향을 맞춘다
-      employee: { '@id': `${siteUrl}/attr/${SITE.firm.lawyerSlug}#person` },
+      // 변호사는 이 사업체(전담본부) 소속으로 모델링 — Person.worksFor 와 방향을 맞춘다. Person 노드는 아래 공통 그래프에 포함
+      employee: attorneys.map((a) => ({ '@id': `${siteUrl}/attr/${a.slug}#person` })),
       subOrganization: { '@id': `${siteUrl}/#andong` },
       parentOrganization: {
         '@type': 'Organization',
@@ -103,6 +105,8 @@ const siteSchema = {
       },
       parentOrganization: { '@id': `${siteUrl}/#legalservice` },
     },
+    // 변호사 3명 — 모든 페이지에 동일하게 정의해 employee/reviewedBy/author 참조가 어디서나 해소되도록
+    ...attorneys.map(personSchema),
     {
       '@type': 'WebSite',
       '@id': `${siteUrl}/#website`,

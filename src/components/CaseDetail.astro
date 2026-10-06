@@ -40,7 +40,7 @@ const summary = {
   q1: `${c.name} 사칭 사기란 무엇인가요?`,
   a1: `${c.name} 사칭 사기는 실제 기업·인물인 "${c.name}"의 이름과 신뢰를 도용해 투자금이나 수수료 명목으로 돈을 받아 가로채는 금융사기입니다. 현재 ${SITE.name}에 ${c.receipts.toLocaleString()}건의 피해가 접수되어 진행 중이며, ${c.date}에 사건으로 등록되었습니다.`,
   q2: `${c.name}에 돈을 보냈다면 어떻게 해야 하나요?`,
-  a2: `첫째, 추가 입금을 멈추세요. "출금하려면 세금·보증금을 내라"는 요구는 전형적인 2차 피해 수법입니다. 둘째, 입금 내역·대화·앱 화면을 지우지 말고 보관하세요. 셋째, 경찰 신고와 별도로 사기범 계좌를 묶는 법원 보전 처분(가압류)을 신청해야 합니다. 경찰 신고는 범인을 잡는 절차이고, 돈을 되찾는 절차는 아닙니다. 피해금 회수는 자금 흐름 분석, 계좌 동결, 민사·형사 병행, 강제집행 순서로 진행되며, 사기범 계좌에 돈이 남아 있을수록 회수 가능성이 높습니다. 초기 상담은 무료이고, 변호사 비밀유지 의무로 가족·직장에 알려지지 않습니다.`,
+  a2: `첫째, 추가 입금을 멈추세요. "출금하려면 세금·보증금을 내라"는 요구는 전형적인 2차 피해 수법입니다. 둘째, 입금 내역·대화·앱 화면을 지우지 말고 보관하세요. 셋째, 경찰 신고와 별도로 사기범 계좌를 묶는 법원 보전 처분(가압류)을 신청해야 합니다. 경찰 신고는 범인을 잡는 절차이고, 돈을 되찾는 절차는 아닙니다. 피해금 회수는 자금 흐름 분석, 계좌 동결, 민사·형사 병행, 강제집행 순서로 진행되며, 사기범 계좌에 돈이 남아 있을수록 회수 가능성이 높지만, 회수는 사건마다 다르며 보장되지 않습니다. 초기 상담은 무료이고, 변호사 비밀유지 의무로 가족·직장에 알려지지 않습니다.`,
 };
 
 /** 지금 당장 할 일 */
@@ -58,7 +58,7 @@ const compare = [
 ];
 
 const faq = [
-  { q: `${c.name} 사칭 사기, 정말 돌려받을 수 있나요?`, a: '사기범 계좌에 돈이 남아 있거나 추적되는 자산이 있으면 묶어서 돌려받을 수 있습니다. 빨리 움직일수록 남아 있는 돈이 많습니다.' },
+  { q: `${c.name} 사칭 사기, 정말 돌려받을 수 있나요?`, a: '사기범 계좌에 돈이 남아 있거나 추적되는 자산이 있으면 묶어서 돌려받을 수 있습니다. 빨리 움직일수록 남아 있는 돈이 많습니다. 다만 회수 가능성은 사건마다 다르며, 모든 사건에서 회수가 보장되는 것은 아닙니다.' },
   { q: '경찰에 신고했는데 왜 아무 연락이 없나요?', a: '경찰은 범인을 잡는 데 집중합니다. 돈을 묶는 보전 처분은 피해자가 법원에 따로 신청해야 하고, 그 사이 돈은 빠져나갑니다.' },
   { q: '증거가 카톡 대화뿐입니다.', a: '입금 내역, 대화, 앱 화면이면 시작할 수 있습니다. 부족한 자료는 저희가 보완합니다. 지우지만 마세요.' },
   { q: '비용이 걱정됩니다.', a: '상담은 무료입니다. 수임 비용은 피해 규모와 회수 가능성을 보고 서면으로 안내하며, 상담 후 결정하셔도 됩니다.' },
@@ -91,16 +91,7 @@ const schema = {
       speakable: { '@type': 'SpeakableSpecification', cssSelector: ['#case-summary'] },
       breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
     },
-    {
-      '@type': 'Person',
-      '@id': `${lawyerUrl}#person`,
-      name: lawyer.name,
-      jobTitle: lawyer.role,
-      url: lawyerUrl,
-      image: `${SITE.url}${lawyer.img}`,
-      worksFor: { '@id': `${SITE.url}/#legalservice` },
-      knowsAbout: lawyer.areas,
-    },
+    // 검수 변호사 Person 노드는 BaseLayout 사이트 공통 스키마에 있음 (reviewedBy/author 가 거기로 해소)
     {
       '@type': 'BreadcrumbList',
       '@id': `${pageUrl}#breadcrumb`,
@@ -144,7 +135,7 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span>
             <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-destructive"></span>
           </span>
-          <p class="min-w-0 truncate font-semibold text-foreground"><span class="text-destructive">정상기업 사칭 사기 주의</span> · "{c.name}"에 돈을 보냈다면, 지금 이 순간에도 그 돈은 세탁되고 있습니다.</p>
+          <p class="min-w-0 truncate font-semibold text-foreground"><span class="text-destructive">정상기업 사칭 사기 주의</span> · "{c.name}"에 돈을 보냈다면, 지금도 그 돈이 다른 계좌로 빠져나가고 있을 수 있습니다.</p>
         </div>
       </div>
 

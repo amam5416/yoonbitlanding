@@ -1,0 +1,42 @@
+---
+/**
+ * 홈 핵심 안내 (AEO/GEO): 질문형 제목 + 첫 문장에서 바로 답하는 요약, 보이는 FAQ (스키마 FAQPage 와 동일 데이터), 검수 변호사 표기.
+ * 사칭 목록 바로 아래에 두어 검색·AI 가 "정상기업 사칭 사기란?" 질문에 이 사이트를 인용할 수 있게 한다.
+ */
+import Icons from '@/components/Icons.astro';
+import { SITE } from '@/site.config';
+import { HOME_GUIDE, HOME_FAQ, HOME_GUIDE_REVIEWER } from '@/data/homeGuide';
+---
+<section id="guide" class="marble-section" data-marble="2" aria-labelledby="guide-title">
+  <div class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+    <div class="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
+      <!-- 핵심 요약 -->
+      <div id="home-summary" data-reveal="0" class="card-lux rounded-xl p-5 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <span class="inline-flex items-center gap-1.5 font-semibold uppercase tracking-wider text-primary"><Icons name="file-text" class="h-3.5 w-3.5" />핵심 안내</span>
+          <span>검수 <a href={`/attr/${HOME_GUIDE_REVIEWER.slug}`} rel="author" class="font-semibold text-foreground underline-offset-2 hover:underline">{HOME_GUIDE_REVIEWER.name}</a> · {SITE.firm.name}</span>
+        </div>
+        <h2 id="guide-title" class="mt-3 text-lg font-bold tracking-tight text-foreground sm:text-xl">{HOME_GUIDE.q1}</h2>
+        <p class="mt-2 text-sm leading-relaxed text-foreground/90 sm:text-[15px]">{HOME_GUIDE.a1}</p>
+        <h2 class="mt-5 text-lg font-bold tracking-tight text-foreground sm:text-xl">{HOME_GUIDE.q2}</h2>
+        <p class="mt-2 text-sm leading-relaxed text-foreground/90 sm:text-[15px]">{HOME_GUIDE.a2}</p>
+      </div>
+
+      <!-- FAQ -->
+      <div>
+        <h2 id="home-faq-title" data-reveal="60" class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">자주 묻는 질문</h2>
+        <div data-reveal="120" class="card-lux mt-4 divide-y divide-border overflow-hidden rounded-xl">
+          {HOME_FAQ.map((f, i) => (
+            <details class="group px-5 py-4" open={i === 0}>
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-foreground">
+                {f.q}
+                <Icons name="chevron-right" class="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
+              </summary>
+              <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

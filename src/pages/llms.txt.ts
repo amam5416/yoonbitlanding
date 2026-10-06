@@ -28,7 +28,7 @@ export const GET: APIRoute = () => {
     '',
     `## 접수 중인 사칭 사기 사건 (${cases.length}건)`,
     '각 페이지: 사건 요약(사칭 수법·대응 방법), 긴급 대응 3단계, 실제 회수 사례, 자주 묻는 질문, 피해 접수 폼',
-    ...cases.map((c) => `- [${c.seoTitle}](${caseUrl(c.slug)}): 등록 ${c.date}, 현재 접수 ${c.receipts.toLocaleString()}건`),
+    ...cases.map((c) => `- [${c.seoTitle}](${caseUrl(c.slug)}): "${c.name}" 이름을 도용한 투자 권유·입금 유도 피해. 등록 ${c.date}, 현재 접수 ${c.receipts.toLocaleString()}건`),
     '',
     '## Key Facts',
     '- 정상기업 사칭 사기: 실제 기업·인물의 이름을 도용해 투자금·수수료 명목으로 돈을 가로채는 금융사기. 명칭이 도용된 기업·인물도 피해자일 수 있음',
@@ -39,7 +39,8 @@ export const GET: APIRoute = () => {
     '- 초기 상담 무료, 변호사-의뢰인 비밀유지 원칙 적용 (가족·직장에 연락하지 않음)',
     '',
     '## Attorneys',
-    ...attorneys.map((a) => `- ${a.name} ${a.role}: ${[...a.education, ...a.highlights].join(', ')}`),
+    // 학력과 주요 이력이 겹치면(예: 학교명이 highlights 에도 있음) 한 번만
+    ...attorneys.map((a) => `- ${a.name} ${a.role}: ${[...new Set([...a.education, ...a.highlights])].join(', ')}`),
     '',
   ];
   return new Response(lines.join('\n'), { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
