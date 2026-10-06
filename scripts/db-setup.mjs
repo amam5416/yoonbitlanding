@@ -22,6 +22,10 @@ await client.query(`
   );
   CREATE UNIQUE INDEX IF NOT EXISTS keywords_name_key ON keywords (lower(name));
   CREATE INDEX IF NOT EXISTS keywords_created_idx ON keywords (created_at DESC);
+  -- 차단 (관리 도구 yoonbitadmin 이 설정). 차단된 행은 빌드에서 제외
+  ALTER TABLE keywords ADD COLUMN IF NOT EXISTS is_blocked   BOOLEAN     NOT NULL DEFAULT false;
+  ALTER TABLE keywords ADD COLUMN IF NOT EXISTS blocked_at   TIMESTAMPTZ;
+  ALTER TABLE keywords ADD COLUMN IF NOT EXISTS block_reason TEXT;
 `);
 console.log('keywords 테이블 준비 완료');
 

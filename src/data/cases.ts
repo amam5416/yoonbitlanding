@@ -1,6 +1,6 @@
 /**
  * 사건 데이터 로더 — 빌드 타임에 한 번 실행.
- * - DATABASE_URL 이 있으면 Postgres `keywords(id, name, receipt_count, created_at)` 에서 읽음
+ * - DATABASE_URL 이 있으면 Postgres `keywords` 에서 읽음 (is_active=false, is_blocked=true 행은 제외 — 관리 도구 yoonbitadmin 에서 차단)
  * - 없거나 실패하면 src/data/cases.static.ts 샘플로 폴백
  * 한 행(name) = 사건 하나 = /rcvlist/<slug> 정적 페이지 하나 (템플릿: src/components/CaseDetail.astro)
  */
@@ -48,7 +48,8 @@ async function loadRows(): Promise<{ rows: KeywordRow[]; source: 'db' | 'static'
   if (hasDatabase) {
     try {
       const rows = await query<KeywordRow>(
-        'SELECT id, name, receipt_count, created_at FROM keywords WHERE COALESCE(is_active, true) ORDER BY created_at DESC, id DESC',
+        // 비활성(is_active=false) 과 차단(is_blocked=true) 은 빌드에서 제외 → 상세 페이지가 생성되지 않아 URL 직접 접근 시 404
+        'SELECT id, name, receipt_count, created_at FROM keywords          WHERE COALESCE(is_active, true) AND NOT COALESCE(is_blocked, false)          ORDER BY created_at DESC, id DESC',
       );
       if (rows.length) return { rows, source: 'db' };
       console.warn('[cases] DB 에 행이 없어 샘플 데이터를 사용합니다.');
