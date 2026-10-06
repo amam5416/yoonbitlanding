@@ -14,23 +14,24 @@ const searchIndex = cases.map((c) => ({ t: c.title, h: caseHref(c.slug), d: c.da
       <span data-reveal="0" class="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
         <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" aria-hidden="true"></span>Recovery Division
       </span>
-      <!-- 전체 문장이 HTML 에 있고(aria-label 포함), JS 가 켜지면 글자를 하나씩 되살림. min-h 로 줄 높이를 미리 확보해 CLS 방지 -->
-      <h1 id="hero-title" aria-label="리딩방에 날린 돈, 아직 찾을 수 있습니다" class="mt-4 min-h-[2.6em] text-pretty text-2xl font-bold leading-tight tracking-tight text-foreground sm:min-h-[1.3em] sm:text-4xl">
-        <span data-type>리딩방에 날린 돈,</span><br class="sm:hidden" /> <span data-type class="text-gold">아직 찾을 수 있습니다</span><span aria-hidden="true" class="ml-0.5 inline-block h-[0.85em] w-[0.09em] translate-y-[0.08em] rounded-[1px] bg-primary align-baseline animate-hero-caret"></span>
+      <!-- 전체 문장이 HTML 에 있고(aria-label 포함), JS 가 켜지면 글자를 하나씩 되살림. min-h 로 줄 높이를 미리 확보해 CLS 방지
+           data-type-alt: 타이핑이 끝나면 지우고 이 문구로 바꿔 번갈아 타이핑 (검색엔진은 HTML 의 첫 문구만 본다) -->
+      <h1 id="hero-title" aria-label="투자사기로 잃은 돈, 아직 찾을 수 있습니다" class="mt-4 min-h-[2.6em] text-pretty text-2xl font-bold leading-tight tracking-tight text-foreground sm:min-h-[1.3em] sm:text-4xl">
+        <span data-type data-type-alt="금융사기로 잃은 돈,">투자사기로 잃은 돈,</span><br class="sm:hidden" /> <span data-type class="text-gold">아직 찾을 수 있습니다</span><span aria-hidden="true" class="ml-0.5 inline-block h-[0.85em] w-[0.09em] translate-y-[0.08em] rounded-[1px] bg-primary align-baseline animate-hero-caret"></span>
       </h1>
       <!-- 첫 페인트 전에 글자를 비워 "전체 문장 → 지움 → 타이핑" 깜빡임 방지. 원문은 data-text 에 보존 -->
       <script is:inline>
         document.querySelectorAll('#hero-title [data-type]').forEach((s) => { s.dataset.text = s.textContent; s.textContent = ''; });
       </script>
       <p data-reveal="160" class="mt-3 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-        리딩방, 코인 거래소 사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br class="sm:hidden" /> 돈을 보낸 곳 이름을 검색해 보세요.
+        보이스피싱, 금융사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br class="sm:hidden" /> 돈을 보낸 곳 이름을 검색해 보세요.
       </p>
 
       <form id="recovery-search-form" data-reveal="240" class="mt-6 flex w-full max-w-2xl flex-col gap-2 sm:flex-row" role="search" method="get" action="/">
-        <label for="recovery-search" class="sr-only">리딩방, 거래소, 업체명 검색</label>
+        <label for="recovery-search" class="sr-only">사기업체명 검색</label>
         <div class="relative flex-1">
           <Icons name="search" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-          <input id="recovery-search" type="search" name="q" autocomplete="off" placeholder="리딩방 이름, 거래소명, 업체명을 입력하세요 (예: OURBIT, 코인플레이스)" class="h-12 w-full rounded-md border border-input glass-input pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
+          <input id="recovery-search" type="search" name="q" autocomplete="off" placeholder="사기업체명을 입력하고 회수 가능성을 확인해보세요." class="h-12 w-full rounded-md border border-input glass-input pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
         </div>
         <button type="submit" class="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-lg btn-gold px-7 text-sm font-semibold whitespace-nowrap transition-all active:translate-y-px">검색</button>
       </form>
@@ -42,23 +43,38 @@ const searchIndex = cases.map((c) => ({ t: c.title, h: caseHref(c.slug), d: c.da
 <script>
   // 제목 타이핑: 원문은 HTML 에 그대로 있고, 애니메이션은 텍스트 노드만 교체 (레이아웃 재계산 최소화)
   // 짧은 1회성 효과라 prefers-reduced-motion 과 무관하게 재생 (무거운 three.js 배경만 설정을 따름)
+  // 문구 교대: data-type-alt 가 있는 구절은 "타이핑 → 잠시 유지 → 전체 지우기 → 다른 문구 타이핑" 을 반복한다
   (() => {
     const parts = Array.from(document.querySelectorAll<HTMLElement>('#hero-title [data-type]'));
     if (!parts.length) return;
-    const texts = parts.map((p) => p.dataset.text ?? p.textContent ?? '');
+    const base = parts.map((p) => p.dataset.text ?? p.textContent ?? '');
+    const variants = [base];
+    if (parts.some((p) => p.dataset.typeAlt)) variants.push(parts.map((p, k) => p.dataset.typeAlt ?? base[k]));
     const nodes = parts.map((p) => { const n = document.createTextNode(''); p.replaceChildren(n); return n; });
-    const SPEED = 55; // ms/글자
-    let i = 0, j = 0, last = 0;
+
+    const TYPE = 55, ERASE = 28, PART_PAUSE = 220, HOLD = 2600, BLANK = 350; // ms
+    let v = 0, i = 0, j = 0, last = 0, mode: 'type' | 'hold' | 'erase' | 'blank' = 'type';
+    const texts = () => variants[v];
+
     const tick = (t: number) => {
-      if (t - last >= SPEED) {
-        last = t;
-        if (i < texts.length) {
-          j++;
-          nodes[i].data = texts[i].slice(0, j);
-          if (j >= texts[i].length) { i++; j = 0; last = t + 220; } // 구절 사이 짧은 멈춤
+      if (mode === 'type' && t - last >= TYPE) {
+        last = t; j++;
+        nodes[i].data = texts()[i].slice(0, j);
+        if (j >= texts()[i].length) {
+          i++; j = 0; last = t + PART_PAUSE;
+          if (i >= texts().length) { mode = 'hold'; last = t; }
         }
+      } else if (mode === 'hold' && t - last >= HOLD) {
+        if (variants.length < 2) return; // 교대 문구가 없으면 한 번만 타이핑하고 종료
+        mode = 'erase'; i = texts().length - 1; j = texts()[i].length; last = t;
+      } else if (mode === 'erase' && t - last >= ERASE) {
+        last = t; j--;
+        nodes[i].data = texts()[i].slice(0, Math.max(j, 0));
+        if (j <= 0) { if (i > 0) { i--; j = texts()[i].length; } else { mode = 'blank'; last = t; } }
+      } else if (mode === 'blank' && t - last >= BLANK) {
+        v = (v + 1) % variants.length; i = 0; j = 0; mode = 'type'; last = t;
       }
-      if (i < texts.length) requestAnimationFrame(tick);
+      requestAnimationFrame(tick); // 탭이 숨겨지면 rAF 가 멈추므로 백그라운드 비용 없음
     };
     requestAnimationFrame(tick);
   })();
@@ -82,7 +98,7 @@ const searchIndex = cases.map((c) => ({ t: c.title, h: caseHref(c.slug), d: c.da
       ? `<ul class="divide-y divide-border overflow-hidden rounded-lg border border-border bg-background shadow-lg">${hits
           .map((i, k) => `<li style="animation:reveal-in .35s ${k * 40}ms both"><a href="${i.h}" class="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-secondary/60"><span class="font-medium text-foreground">${i.t}</span><span class="font-mono text-xs text-muted-foreground">${i.d}</span></a></li>`)
           .join('')}</ul>`
-      : `<div class="rounded-lg border border-border bg-background px-4 py-4 text-sm text-muted-foreground shadow-lg">'<strong class="text-foreground">${q}</strong>' 이름으로 접수된 사건은 아직 없습니다. 리딩방은 이름을 자주 바꾸니 <a href="${phone}" class="font-semibold text-primary">전화로 물어보시면</a> 같은 조직인지 확인해 드립니다.</div>`;
+      : `<div class="rounded-lg border border-border bg-background px-4 py-4 text-sm text-muted-foreground shadow-lg">'<strong class="text-foreground">${q}</strong>' 이름으로 접수된 사건은 아직 없습니다. 사기업체는 이름을 자주 바꾸니 <a href="${phone}" class="font-semibold text-primary">전화로 물어보시면</a> 같은 조직인지 확인해 드립니다.</div>`;
   }
   form.addEventListener('submit', (e) => {
     e.preventDefault();
