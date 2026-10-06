@@ -22,12 +22,14 @@ interface Props {
   publishedTime?: string;
   modifiedTime?: string;
 }
+/** 검색·SNS 미리보기 대표 이미지 (네이버·구글 og:image, JSON-LD image). 교체 시 public/ 파일과 크기를 함께 갱신 */
+const DEFAULT_OG = { path: '/nog.jpg', width: 949, height: 1280, alt: `${SITE.firm.name} 피해금 회수 결과 안내서 — 전액 회복` };
 const {
   title = SITE.title,
   description = SITE.description,
   type = 'website',
-  ogImage: ogPath = '/og.jpg',
-  ogImageAlt = SITE.name,
+  ogImage: ogPath = DEFAULT_OG.path,
+  ogImageAlt = DEFAULT_OG.alt,
   schema,
   canonical: canonicalProp,
   noindex = false,
@@ -124,8 +126,9 @@ const schemas = [siteSchema, ...(schema ? (Array.isArray(schema) ? schema : [sch
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={ogImage} />
-  {ogPath === '/og.jpg' && <meta property="og:image:width" content="1254" />}
-  {ogPath === '/og.jpg' && <meta property="og:image:height" content="1254" />}
+  {ogPath === DEFAULT_OG.path && <meta property="og:image:width" content={String(DEFAULT_OG.width)} />}
+  {ogPath === DEFAULT_OG.path && <meta property="og:image:height" content={String(DEFAULT_OG.height)} />}
+  {ogPath === DEFAULT_OG.path && <meta property="og:image:type" content="image/jpeg" />}
   <meta property="og:image:alt" content={ogImageAlt} />
   <meta property="og:locale" content="ko_KR" />
   {type === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
