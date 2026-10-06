@@ -213,7 +213,7 @@ const LABEL = caseName ? `${caseName} 피해 접수` : '사칭 업체 피해회�
       btn.disabled = true;
       setLocked(true);
       const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
-      if (data.amount) data.amount = digits(data.amount);
+      if (data.amount) data.amount = digits(data.amount); // 서버에서 "50,000,000" 형식으로 재포맷해 전달
       try {
         const res = await fetch('/api/inquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, source: location.href }) });
         if (!res.ok) throw new Error(String(res.status));

@@ -219,7 +219,7 @@ const inputCls = 'mt-1.5 h-11 w-full rounded-md border border-input glass-input 
             <p class="mt-2 text-sm leading-relaxed text-muted-foreground">이름·연락처·금액, 세 가지면 됩니다. 30초면 끝납니다.</p>
 
             <form class="inquiry-form mt-5 space-y-3" novalidate>
-              <input type="hidden" name="caseName" value={c.detailTitle} />
+              <input type="hidden" name="caseName" value={c.name} />
               <label class="block text-xs font-medium text-foreground">이름 <span class="text-destructive">*</span>
                 <input name="name" data-label="이름" type="text" required placeholder="홍길동" class={inputCls} /></label>
               <label class="block text-xs font-medium text-foreground">연락처 <span class="text-destructive">*</span>
