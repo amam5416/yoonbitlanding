@@ -24,14 +24,14 @@ const searchIndex = cases.map((c) => ({ t: c.title, h: caseHref(c.slug), d: c.da
         document.querySelectorAll('#hero-title [data-type]').forEach((s) => { s.dataset.text = s.textContent; s.textContent = ''; });
       </script>
       <p data-reveal="160" class="mt-3 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-        보이스피싱, 금융사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br class="sm:hidden" /> 더 늦기 전에 피해 사례를 확인하고 회수 확률을 높이세요.
+        보이스피싱, 금융사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br class="hidden sm:inline" /> 더 늦기 전에 피해 사례를 확인하고<br class="sm:hidden" /> 회수 확률을 높이세요.
       </p>
 
       <form id="recovery-search-form" data-reveal="240" class="mt-6 flex w-full max-w-2xl flex-col gap-2 sm:flex-row" role="search" method="get" action="/">
         <label for="recovery-search" class="sr-only">사기업체명 검색</label>
         <div class="relative flex-1">
           <Icons name="search" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-          <input id="recovery-search" type="search" name="q" autocomplete="off" placeholder="사기업체명을 입력하고 회수 가능성을 확인해보세요. (예: OURBIT, 코인플레이스)" class="h-12 w-full rounded-md border border-input glass-input pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
+          <input id="recovery-search" type="search" name="q" autocomplete="off" placeholder="사기업체명을 입력하고 회수 가능성을 확인해보세요." class="h-12 w-full rounded-md border border-input glass-input pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
         </div>
         <button type="submit" class="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-lg btn-gold px-7 text-sm font-semibold whitespace-nowrap transition-all active:translate-y-px">검색</button>
       </form>
