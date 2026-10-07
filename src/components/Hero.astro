@@ -24,7 +24,7 @@ const searchIndex = cases.map((c) => ({ t: c.title, h: caseHref(c.slug), d: c.da
         document.querySelectorAll('#hero-title [data-type]').forEach((s) => { s.dataset.text = s.textContent; s.textContent = ''; });
       </script>
       <p data-reveal="160" class="mt-3 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-        보이스피싱, 금융사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br class="hidden sm:inline" /> 더 늦기 전에 피해 사례를 확인하고<br class="sm:hidden" /> 회수 확률을 높이세요.
+        보이스피싱, 금융사기 피해 <strong class="font-semibold text-foreground" data-count={TOTAL_CASES} data-suffix="건">{TOTAL_CASES.toLocaleString()}건</strong> 접수 중.<br /> 더 늦기 전에 피해 사례를 확인하고<br class="sm:hidden" /> 회수 확률을 높이세요.
       </p>
 
       <form id="recovery-search-form" data-reveal="240" class="mt-6 flex w-full max-w-2xl flex-col gap-2 sm:flex-row" role="search" method="get" action="/">
